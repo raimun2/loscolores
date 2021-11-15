@@ -8,13 +8,13 @@ laspaletas <- readRDS("extdata/palettes.rds")
 #'
 #' @param index index of the palette, between 1 and 39
 #' @param n number of colors for discrete palette
-#' @param type type of palette, continuos or discrete
+#' @param type type of palette, c (continuous) or d (discrete)
 #'
 #' @return a palette with desired specifications
 #' @export
 #'
 #' @examples
-loscolores <- function(index, n, type = c("discrete", "continuous")) {
+loscolores <- function(index, n, type = c("d", "c")) {
   type <- match.arg(type)
 
   pal <- laspaletas[index,]
@@ -22,13 +22,13 @@ loscolores <- function(index, n, type = c("discrete", "continuous")) {
 
   if (missing(n)) { n <- length(pal) }
 
-  if (type == "discrete" && n > length(pal)) {
+  if (type == "d" && n > length(pal)) {
     stop("Number of requested colors greater than what palette can offer")
   }
 
   out <- switch(type,
-                continuous = grDevices::colorRampPalette(pal)(n),
-                discrete = pal[sort(sample(1:length(pal), n))]
+                c = grDevices::colorRampPalette(pal)(n),
+                d = pal[sort(sample(1:length(pal), n))]
   )
   structure(out, class = "palette", index = index)
 }
