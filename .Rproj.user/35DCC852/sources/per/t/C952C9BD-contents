@@ -1,0 +1,195 @@
+# relato
+# colores suelen venir de hex, o rgb, mayormente denominado srgb
+# rgb permite un subconjunto del espectro visible
+# existen otros espacios de color
+# espacios CIE RGB, XYZ xyx lab luv
+# luminance
+# aditivo cs sustractivo, cmyk, ryb, cmy
+# espacios cilindricos hue y saturacion
+# espacios raros (YIQ, Ycbcr, YBW)
+# espacios RGB
+# colores imposibles y colores fuera de gamuts reproducibles
+# profile conection space
+
+## colorspace
+## farver
+## base R
+## colorscience
+
+### RGB SPACES ANALYSIS
+#### otro orden
+tetra_croma <- c("cmyk")
+
+tri_croma <- c("cmy", "rgb", "ryb", "hwb")
+
+di_croma_cartesian <- c("lab", "hunterlab","oklab", "luv", "ycbcr", "yiq", "yuv")
+
+di_croma_polar <- c("hsl", "hsb", "hsv", "lch", "hcl", "oklch", "xyx", "xyz")
+
+all_spaces <- c(tetra_croma, tri_croma, di_croma_cartesian, di_croma_polar)
+
+####
+# RGB	0, 255, 255
+# RGB Percent	0%, 100%, 100%
+
+farver_spaces <- c("cmy", "cmyk", "hsl", "hsb", "hsv", "lab", "hunterlab",
+                   "oklab", "lch", "luv", "rgb", "xyz", "yxy", "hcl", "oklch")
+
+pacman::p_load(colorspace, colorscience, farver, tidyverse)
+
+test_hex <- all_colors() %>% col2rgb() %>% t()
+
+  #matrix(c(255,0,0,0,255,0,0,0,255), ncol=3)
+
+
+# base R     "XYZ", "sRGB", "Apple RGB", "CIE RGB"
+#lch polarlab
+#hcl polarluv
+#oklch polaroklab
+
+
+
+# sRGB
+base_srgb_xyz <- convertColor(test_hex/255, from = "sRGB", to="XYZ")*100
+baser_srgb_yxy <- farver::convert_colour(base_srgb_xyz, from="xyz", to="lab")
+
+space_sRGB_XYZ <- as(colorspace::sRGB(test_hex/255), "XYZ")@coords
+space_srgb_yxy <- farver::convert_colour(space_sRGB_XYZ, from="xyz", to="lab")
+
+science_RGB_XYZ <- colorscience::RGB2XYZ(test_hex/255)*100
+science_RGB_yxy <- farver::convert_colour(science_RGB_XYZ, from="xyz", to="lab")
+
+farver_rgb_xyz <- farver::convert_colour(test_hex, from="rgb", to="xyz")
+farver_rgb_yxy <- farver::convert_colour(farver_rgb_xyz, from="xyz", to="lab")
+
+
+## OTHER RGBs
+
+# adobe rgb
+space_RGB_XYZ <- as(colorspace::RGB(test_hex/255), "XYZ")@coords
+space_RGB_yxy <- farver::convert_colour(space_RGB_XYZ, from="xyz", to="lab")
+
+base_argb_xyz <- convertColor(test_hex/255, from = "Apple RGB", to="XYZ")*100
+base_argb_yxy <- farver::convert_colour(base_argb_xyz, from="xyz", to="lab")
+
+base_crgb_xyz <- convertColor(test_hex/255, from = "CIE RGB", to="XYZ")*100
+base_crgb_yxy <- farver::convert_colour(base_crgb_xyz, from="xyz", to="lab")
+
+ggplot() +
+  # geom_point(data= as_tibble(baser_srgb_yxy), aes(a, b, col = "base srgb")) +
+  # geom_point(data= as_tibble(space_srgb_yxy), aes(a, b, col = "space srgb")) +
+  # geom_point(data= as_tibble(science_RGB_yxy), aes(a, b, col = "science RGB")) +
+  geom_point(data= as_tibble(farver_rgb_yxy), aes(a, b, col="farver rgb")) +
+  geom_point(data= as_tibble(space_RGB_yxy), aes(a, b, col="space rgb")) +
+  geom_point(data= as_tibble(base_argb_yxy), aes(a, b, col ="base Apple")) +
+  geom_point(data= as_tibble(base_crgb_yxy), aes(a, b, col="base CIE"))
+
+
+
+
+
+
+
+
+
+
+#XYZ, Lab, Luv, RGB
+
+
+### base R
+
+# https://rdrr.io/r/grDevices/adjustcolor.html
+# https://rdrr.io/r/grDevices/colorRamp.html
+# https://rdrr.io/r/grDevices/colors.html
+# https://rdrr.io/r/grDevices/col2rgb.html
+# https://rdrr.io/r/grDevices/densCols.html
+# https://rdrr.io/r/grDevices/convertColor.html
+# https://rdrr.io/r/grDevices/gray.colors.html
+# https://rdrr.io/r/grDevices/gray.html
+# https://rdrr.io/r/grDevices/hcl.html
+# https://rdrr.io/r/grDevices/make.rgb.html
+# https://rdrr.io/r/grDevices/rgb.html
+# https://rdrr.io/r/grDevices/rgb2hsv.html
+
+
+
+post_path <- paste0("posts/",list.files("posts"))
+path <- post_path[20]
+
+
+
+
+
+
+for(space in all_spaces){
+
+  png(paste0("spaces/",space,".jpg"), width = 350, height = 700)
+  plot_image_colorspace(path, space=space)
+  dev.off()
+
+}
+
+###############3
+
+pals <- unlist(pals)
+
+
+cols <- t(col2rgb(pals))/255
+cols_degamma <-  gamma(cols)
+
+cols_XYZ <- as(colorspace::RGB(cols_degamma), "XYZ")@coords
+
+vuelta <- as(colorspace::XYZ(cols_XYZ), "sRGB")@coords
+vueltavss <- degamma(vuelta)
+
+library(tidyverse)
+colores <- NULL
+#colnames(colores) <- paste0("rgb","_",colnames(colores))
+
+
+for(spac in all_spaces){
+  colt <- color_convert(cols, from="rgb", to = spac)
+  colnames(colt) <- paste0(spac,"_",colnames(colt))
+  colores <- cbind(colores, colt)
+
+  print(spac)
+  print(summary(colt))
+}
+
+colores <- colores %>% as_tibble() %>% unique()
+
+
+
+hues <- colores %>%
+  select(contains("_h"))
+
+coldim <- colores %>%
+  select(cmyk_c, cmyk_k, cmyk_m, cmyk_y, rgb_green, rgb_red, rgb_blue, lab_a, lab_b, luv_u, luv_v, yxy_x, yxy_y2,
+         xyz_x, xyz_z, yiq_i, yiq_q, ycbcr_cb, ycbcr_cr, hunterlab_a, hunterlab_b) %>%
+  scale()
+
+
+library(Rtsne)
+
+tsne <- Rtsne(coldim, dims = 2)
+
+aers <- tsne$Y %>% as_tibble()
+
+pca <- predict(prcomp(coldim))
+
+aers <- data.frame("V1" = pca[,1], "V2" = pca[,2])
+
+ggplot(aers, aes(V1, V2)) + geom_point(col= hsv(h = colores$hsv_h/360 ,s = colores$hsv_s, v = 1))
+
+
+cor(aers$V2, coldim)^2
+
+
+
+
+
+
+
+
+
+

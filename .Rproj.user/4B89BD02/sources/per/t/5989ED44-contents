@@ -1,0 +1,146 @@
+### 1 COLOR ADQUISITION
+
+# known palettes
+pals <- read_rds("extdata/paletas_prop.rds")
+
+# all possible RGB combinations
+all_colors <- function(websafe = TRUE){
+  if(!websafe) {
+    hex <- c(0:9, LETTERS[1:6])
+    pal <- expand.grid("#", hex, hex, hex, hex, hex, hex)
+  } else {
+    hex <- c("00", "33", "66", "99", "CC", "FF")
+    pal <- expand.grid("#", hex, hex, hex)
+  }
+  return(pal %>% purrr::reduce(paste0))
+}
+
+
+# images diferent formats
+read_image <- function(path){
+  imagen <- magick::image_read(path)
+  imagen <- as.numeric(magick::image_data(imagen, channels = "rgba"))
+  return(imagen)
+}
+
+image_colors <- function(imagen, dataframe = FALSE, unique = FALSE){
+  if(is.character(imagen)){
+    imagen <- read_image(imagen)
+  }
+  if(!is.numeric(imagen)) {
+    imagen <- as.numeric(magick::image_data(imagen, channels = "rgba"))
+  }
+  if(dataframe){
+    df_colors <- data.frame(
+      x = rep(1:dim(imagen)[2], each = dim(imagen)[1]),
+      y = rep(dim(imagen)[1]:1, dim(imagen)[2]),
+      R = as.vector(imagen[,,1]),
+      G = as.vector(imagen[,,2]),
+      B = as.vector(imagen[,,3]),
+      alpha = as.vector(imagen[,,4]))
+
+    df_colors$hex = rgb(df_colors$R,df_colors$G,
+                        df_colors$B,df_colors$alpha,
+                        maxColorValue = 1)
+
+    return(df_colors)
+  }else{
+    colorvector <- rgb(imagen[,,1], imagen[,,2], imagen[,,3], imagen[,,4], maxColorValue = 1)
+    if(unique){
+      colorvector <- unique(colorvector)
+    }
+    return(colorvector)
+  }
+}
+
+# rasters
+## ggmap object
+map_colors <- function(map, dataframe = FALSE, unique = FALSE){
+  if(dataframe){
+    map_mat <- apply(map, c(1, 2), function(x) as.numeric(col2rgb(x)))
+
+    df_colors <- data.frame(
+      x = rep(1:dim(map)[2], each = dim(map)[1]),
+      y = rep(dim(map)[1]:1, dim(map)[2]),
+      R = as.vector(map_mat[1,,])/255,
+      G = as.vector(map_mat[2,,])/255,
+      B = as.vector(map_mat[3,,])/255)
+
+    df_colors$hex = rgb(df_colors$R,df_colors$G,
+                        df_colors$B,
+                        maxColorValue = 1)
+
+    return(df_colors)
+  }else{
+    map_col <- apply(map, 1, function(x) x)
+    colorvector <- as.vector(map_col)
+    if(unique){
+      colorvector <- unique(colorvector)
+    }
+    return(colorvector)
+  }
+}
+
+## raster of hex codes
+raster_colors <- function(rasterhex, dataframe = FALSE, unique = FALSE){
+  if(dataframe){
+    mat_ras <- as.matrix(rasterhex)
+
+    arr_ras <- apply(mat_ras,  c(1,2), function(x) as.numeric(col2rgb(x)))
+
+    df_colors <- data.frame(
+      x = rep(1:dim(mat_ras)[2], each = dim(mat_ras)[1]),
+      y = rep(dim(mat_ras)[1]:1, dim(mat_ras)[2]),
+      R = as.vector(map_mat[1,,])/255,
+      G = as.vector(map_mat[2,,])/255,
+      B = as.vector(map_mat[3,,])/255)
+
+    df_colors$hex = rgb(df_colors$R,df_colors$G,
+                        df_colors$B,
+                        maxColorValue = 1)
+
+    return(df_colors)
+  }else{
+    colorvector <- as.vector(rasterhex)
+    if(unique){
+      colorvector <- unique(colorvector)
+    }
+    return(colorvector)
+  }
+}
+
+# spectral raster images
+raster_brick_colors <- function(raster_sat, dataframe = FALSE, unique = FALSE, channels = NULL){
+  if(length(names(raster_sat))>3)  {
+    if(is.null(channels)) channels <- c(4,3,2)
+    raster_sat <- subset(raster_sat, channels)
+  }
+  red <- as.matrix(subset(raster_sat, 1))
+  green <- as.matrix(subset(raster_sat, 2))
+  blue <- as.matrix(subset(raster_sat, 3))
+
+  df_colors <- data.frame(
+    x = rep(1:dim(red)[2], each = dim(red)[1]),
+    y = rep(dim(red)[1]:1, dim(red)[2]),
+    R = as.vector(red)/max(red, green, blue, na.rm = TRUE),
+    G = as.vector(green)/max(red, green, blue, na.rm = TRUE),
+    B = as.vector(blue)/max(red, green, blue, na.rm = TRUE))
+
+  df_colors <- df_colors[!is.na(df_colors$R),]
+
+
+  df_colors$hex = rgb(df_colors$R,df_colors$G,
+                      df_colors$B,
+                      maxColorValue = 1)
+
+  if(dataframe){
+    return(df_colors)
+  }else{
+    colorvector <- as.vector(df_colors$hex)
+    if(unique){
+      colorvector <- unique(colorvector)
+    }
+    return(colorvector)
+  }
+}
+

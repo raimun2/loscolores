@@ -1,0 +1,109 @@
+pacman::p_load_gh("andreacirilloac/paletter")
+pacman::p_load(tidyverse, paletter, TSP)
+set.seed(42)
+image_path <- list.files("palettes/posts", "*.jpg")
+
+palettes <- NULL
+
+for(i in image_path){
+  colours_vector <- create_palette(image_path = paste0("palettes/posts/",i),
+                                   number_of_colors = 64,
+                                   type_of_variable = "categorical")
+
+  palettes <- rbind(palettes,colours_vector)
+
+}
+
+write_rds(palettes, "palettes.rds")
+library(Rtsne)
+
+
+palettes <- read_rds("extdata/palettes.rds")
+
+ord_pal <- NULL
+for(i in 1:39){
+  colours_vector <- palettes[i,]
+
+  structure(colours_vector, class = "palette", index = i)
+
+  rgb <- col2rgb(colours_vector)
+  HSVcol <- rgb2hsv(rgb)
+
+  luminance <- rgbt[,1]*0.2126 + rgbt[,2]*0.7152 + rgbt[,3]*0.0722
+  contrast <- rgbt[,1]*0.299 + rgbt[,2]*0.587 + rgbt[,3]*0.114
+  HSP <- rgbt[,1]^2*0.299 + rgbt[,2]^2*0.7152 + rgbt[,3]^2*0.0722
+  coolness <- (rgbt[3,] - rgbt[1,])/ (rgbt[1,] + rgbt[3,])
+  red <- rgbt[1,]/255
+  green <- rgbt[2,]/255
+  blue <- rgbt[3,]/255
+  hue <- HSVcol[1,]
+  saturation <- HSVcol[2,]
+  brightness <- HSVcol[3,]
+  meanRGB <- rowMeans(t(rgb)/255)
+
+  library(GA)
+
+  ssr <- function(bhue, bred, blum, bcon, bhsp, bgreen, bblue, bsat, bbrig, bmean) {
+
+    dist <- bhue*hue + bred*red + blum*luminance +
+      bcon*contrast + bhsp*HSP + bgreen*green + bblue*blue + bsat*saturation
+      bbrig*brightness + bmean*meanRGB
+
+    distaux <<- dist
+
+    return(sd(diff(dist[order(dist)]))/mean(diff(dist[order(dist)])))
+
+  }
+
+  GA <- ga(type = "real-valued",
+           fitness =  function(x) -ssr(x[1], x[2], x[3], x[4], x[5], x[6], x[7], x[8], x[9], x[10]),
+           lower = c(0, 0, -100, -100, 0, -100, -100, 0, 0, -100),
+           upper = c(1, 100, 0, 0, 100, 100, 0, 100, 100, 0),
+           popSize = 300, maxiter = 1000, run = 200, pmutation = 0.8)
+
+
+  dist <- exp(hue) + (saturation)/18 - brightness/8
+
+  ordered_cols <- colours_vector[order(dist)]
+  structure(ordered_cols, class = "palette", index = i)
+
+
+
+
+
+  hue <- HSVcol[1,] + rowMeans(t(rgb)/255) + HSVcol[2,]/5 - HSVcol[3,]/5
+  ordered_cols <- colours_vector[order(hue)]
+  structure(ordered_cols, class = "palette", index = i)
+
+
+  rgbt <- cbind(t(rgb), redness, luminance, contrast, HSP, coolness)
+
+  tsne <- Rtsne(tsdata, dims = 2, perplexity = 3, theta = 0)
+
+
+  dists <- dist(rbind(c(255,0,0),t(rgb))) %>% as.matrix()
+
+  start_col <- which(min(dists[-1,1])==dists[-1,1])
+
+  HSVt <- t(HSVcol)
+  tsdata <- cbind(predict(prcomp(HSVt)))
+
+  HSVt[,2] <- HSVt[,2]/10
+  HSVt[,3] <- HSVt[,3]/10
+
+  predict(prcomp(HSVt))
+
+  ### TSP approach
+  tsp <- as.TSP(dist(tsdata))
+  sol <- solve_TSP(tsp, control = list(repetitions = 1e3))
+  index <- which( (sol %>% as.numeric()) == start_col)
+  ordered_cols <- colours_vector[sol[c(index:64,1:(index-1))]]
+  structure(ordered_cols, class = "palette", index = i)
+
+
+
+
+  #ord_pal <- rbind(ord_pal,ordered_cols)
+
+}
+

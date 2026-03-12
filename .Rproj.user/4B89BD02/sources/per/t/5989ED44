@@ -1,0 +1,26 @@
+{
+    "id": "5989ED44",
+    "path": "C:/Users/raimundo.sanchez/Dropbox/Github/loscolores/R/1.color_gathering.R",
+    "project_path": null,
+    "type": "r_source",
+    "hash": "1926440044",
+    "contents": "",
+    "dirty": false,
+    "created": 1642816800673.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "16,0",
+        "scrollLine": "0"
+    },
+    "folds": "6|39|15|0|\n19|29|23|0|\n25|68|53|0|\n57|63|81|0|\n84|72|109|0|\n112|96|144|0|\n",
+    "lastKnownWriteTime": 1643028174,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1643037238652,
+    "read_only": false,
+    "read_only_alternatives": []
+}

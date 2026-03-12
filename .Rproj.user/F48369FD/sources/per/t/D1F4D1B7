@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1636979983190.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2057423825",
+    "id" : "D1F4D1B7",
+    "lastKnownWriteTime" : 1637000261,
+    "last_content_update" : 1637000261600,
+    "path" : "C:/Users/Raimundo/Dropbox/Github/posts/create_palettes.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "62,2",
+        "scrollLine" : "42"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

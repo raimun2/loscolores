@@ -1,0 +1,27 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1636978478840.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1272325576",
+    "id" : "A0DC576D",
+    "lastKnownWriteTime" : 1636979742,
+    "last_content_update" : 1636979742609,
+    "path" : "C:/Users/Raimundo/Dropbox/Github/loscolores/README.Rmd",
+    "project_path" : "README.Rmd",
+    "properties" : {
+        "cursorPosition" : "69,0",
+        "last_setup_crc32" : "D7D809F1bb338d19",
+        "scrollLine" : "69",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

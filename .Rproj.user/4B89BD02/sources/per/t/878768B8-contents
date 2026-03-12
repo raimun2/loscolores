@@ -1,0 +1,470 @@
+### 2 COLOR CHARACTERIZATION
+# scales standard between 0 and 1, or between -0.5 and 0.5
+# wrigth guild data 2* & 10* observer
+# XYZ & xyY space
+# d50 d65 & other iluminant coordinates in xyY space
+# rgb transform to xyY space depending on an iluminant, for every RGB systems available
+# gamma correction of RGB spaces
+# xyY to any other space with any iluminant
+# xyY to every output form hex, munsell, ncs, decimal
+# class color with coordinates in xyY space and color attributes (ligthness, saturation, hue, rgbcmywk, brighness, chroma, a, b yb, yc)
+# allow for transparency / opacity
+
+######################### material
+## hex colors by definition are in the sRGB color space
+
+
+# gamma (or transfer curve)
+gamma_correction <- function(linear_channel, gamma = 2.4){
+  if(linear_channel <= 0.0031308){
+    linear_channel * 12.92
+  } else {
+    1.055*linear_channel^(1/gamma) - 0.055
+  }
+}
+
+gamma_inverse <- function(gamma_channel, gamma = 2.4){
+  if ( colorChannel <= 0.04045 ) {
+    gamma_channel / 12.92
+  } else {
+    (( gamma_channel + 0.055)/1.055)^gamma
+  }
+}
+#https://observablehq.com/@sebastien/srgb-rgb-gamma
+
+# Profile Connection Space <- PCS <- XYZ xyY
+
+
+
+### corregir las escalas
+## normalized values
+# clip = TRUE eliminar bordes en diferencias de gamut
+
+
+colorspace_scapes <- c("sRGB", "RGB", "XYZ", "HSV", "HLS", "LAB", "polarLAB", "LUV", "polarLUV")
+
+
+colorscience_spaces <- c("hsl", "hsv", "lef", "lms", "lslm", "ycc", "xyz", "ycbcr",
+                         "yiq", "ypbpr", "yuv", "bvr", "hunterlab", "lab", "luv",
+                         "rxryrz", "xyY", "Yuv")
+
+farver_spaces <- c("cmy", "cmyk", "hsl", "hsb", "hsv", "lab", "hunterlab",
+                    "oklab", "lch", "luv", "rgb", "xyz", "yxy", "hcl", "oklch")
+
+los_colores_spaces <- c("ycbcr", "yiq", "yuv", "ryb", "hwb")
+
+#lch polar lab
+#hcl polar luv
+#oklch polar oklab
+
+#### otro orden
+tetra_croma <- c("cmyk")
+
+tri_croma <- c("cmy", "rgb", "ryb", "hwb")
+
+di_croma_cartesian <- c("lab", "hunterlab","oklab", "luv", "ycbcr", "yiq", "yuv")
+
+di_croma_polar <- c("hsl", "hsb", "hsv", "lch", "hcl", "oklch", "xyx", "xyz")
+
+all_spaces <- c(tetra_croma, tri_croma, di_croma_cartesian, di_croma_polar)
+
+
+
+
+
+# backlog espacios raros
+# HSI
+# TSL
+# LMS # long medium short
+# DKL
+# DIN99
+# YES
+# YRGB  teoría del color de Ostwald: amarillo, rojo, azul y verde
+
+
+
+## espacios RGB
+## adobe RGB (wide gamut)
+## sRGB
+## Apple RGB
+## ISO RGB
+## extended ISO RGB
+## CIE RGB
+## ROMM RGB (kodak)
+## sc RGB
+## DCI-P3
+## Rec. 2020
+## Rec. 709
+
+
+
+
+# https://math.stackexchange.com/questions/305395/ryb-and-rgb-color-space-conversion
+# https://web.archive.org/web/20130525061042/www.insanit.net/tag/rgb-to-ryb/
+# https://en.wikipedia.org/wiki/RYB_color_model
+
+
+
+# https://developer.mozilla.org/en-US/docs/Web/Accessibility/Understanding_Colors_and_Luminance
+# http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+# https://www.easyrgb.com/en/math.php
+# https://drafts.csswg.org/css-color/#predefined
+# https://ciechanow.ski/color-spaces/
+# http://poynton.ca/PDFs/coloureq.pdf
+# https://www.mathworks.com/help/images/understanding-color-spaces-and-color-space-conversion.html
+# https://www.ryanjuckett.com/rgb-color-space-conversion/
+# http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html
+#
+
+
+# Format	Color
+
+# PCS2munsel
+# PCS2NCS
+# PCS2hex
+# PCS2decimal
+# PCS2websafe
+# PCS28sRGB
+# PCS2android
+
+# munsel
+# Colors in the NCS are defined by three values, expressed in percentages, specifying the degree of blackness (s , = relative visual similarity to the black elementary color), chromaticness (c, = relative visual similarity to the "strongest", most saturated, color in that hue triangle), and hue (Φ, = relative similarity to one or two of the chromatic elementary colors red, yellow, green and blue, expressed in at most two percentages). This means that a color can be expressed as either Y (yellow), YR (yellow with a red component), R (Red), RB (red with a blue component), B (blue), etc. No hue is considered to have visual similarity to both hues of an opponent pair; i.e. there is no "redgreen" or "yellowblue". The blackness and the chromaticness together add up to less than or equal to 100%. The remainder from 100%, if any, gives the amount of whiteness (w).[2] Achromatic colors, i.e. colors that lack chromatic contents (ranging from black, to grey and finally white), have their hue component replaced with a capital "N", for example "NCS S 9000-N" (a more or less complete black). NCS color notations are sometimes prepended by a capital "S", which denotes that the current version of the NCS color standard was used to specify the color.
+# Yellow – NCS 0580-Y10R (nuance = 5% blackness, 80% chromaticness, hue = 90% yellow + 10% red. Strong, very slightly blackish yellow with a slight orangish tinge)
+# Blue – NCS 4055-R95B (nuance = 40% blackness, 55% chromaticness, hue = 5% red + 95% blue. Somewhat dark, medium strong blue with a very slight purplish tinge)
+# Decimal	65535
+# websafe divide 256 en 6
+
+
+
+#nuance
+#chromaticness
+
+# atributos de color
+
+
+# hue
+# saturation
+# chroma (= colorfulness) hue*saturation
+
+# red, yellow, blue, green, white, black, cyan, magenta
+# a* va de rojo a verde y B o b* va de azul a amarillo
+# cr cb diferencia de azul y diferencia de rojo
+# Z es aproximadamente igual al estímulo de azul (conos S), y X es una mezcla tendiente a la curva de sensibilidad del rojo al verde (conos L y M)
+# fase (i de YIQ)
+# cuadratura (Q de YIQ)
+# U (blue projection) and V (red projection)
+
+
+
+# relative luminance (Y)
+# sRGB / 255
+# degamma
+# 0.2126*R + 0.7152*G + 0.0722*B
+
+# luma (Y')
+# sRGB / 255
+# 0.2126*R' + 0.7152*G' + 0.0722*B'
+
+# pesos para Y & Y' suman 1. def: 709, 601, 240, 2020
+
+# perceived lightness (L*(Y)) (0-100)
+# Y * 903.3 si Y <= 0.008856, else Y^(1/3)*116 - 16
+
+# brightness (V)
+# perceived brightness (Q)
+
+# I intensity 1/3 (R+G+B)
+# V value = max(R,G,B) also called brightness
+# L ligthness 1/2( max(R,G,B) - min(R,G,B))
+# Y luma (gamma corrected weighted average of their contribution to perceived lightness) (YIQ, YCbCr, YUV)
+# luma 709 = 0.2126*R + 0.7152*G + 0.0722*B
+# tambien hay lumas 601, 240, 2020, pesos suman 1
+# lightness2 lab <- relative luminance respect to near black, square rooted
+# L2 = 116*f(Y/Yn) - 16, Y del XYZ, Yn depende del iluminant, f(t) t^(1/3) si t> d <- 6/29, sino t/(3*d^2) + 4/29
+# L3 lightness3 hunterlab 100*(Y/yn)^(1/2)
+# luminance (relative) Y del xyz same formula luma but linear rgb signal
+
+
+# ligth reflection
+
+
+#color temperature https://en.wikipedia.org/wiki/Planckian_locus
+# spectral wavelength
+# Color	Longitud de onda
+# violeta	~ 380-427 nm
+# azul	~ 427-476 nm
+# cian	~ 476-497 nm
+# verde	~ 497-570 nm
+# amarillo	~ 570–581 nm
+# naranja	~ 581–618 nm
+# rojo	~ 618–780 nm
+
+
+
+
+
+
+
+all_spaces <- c(farver_spaces, los_colores_spaces)
+
+rgb2ycbcr_M <- matrix(c(0.299 , 0.587 , 0.114 ,
+                        -0.169 , -0.331 , 0.5,
+                        0.5, - 0.419 ,- 0.081), ncol = 3)
+ycbcr2rgb_M <- solve(rgb2ycbcr_M)
+rgb2ycbcr_K <- matrix(c(0, 128, 128))
+
+rgb2yuv_M <- matrix(c( 0.299 , 0.587 , 0.114 ,
+                       -0.147 , - 0.289 , 0.436 ,
+                       0.615 , - 0.515 ,- 0.1), ncol = 3)
+yuv2rgb_M <- solve(rgb2yuv_M)
+
+rgb2yiq_M <- matrix(c( 0.299 , 0.587 , 0.114 ,
+                       0.596,-0.275 ,-0.321 ,
+                       0.212 ,-0.523 , 0.311), ncol = 3)
+yiq2rgb_M <- solve(rgb2yiq_M)
+
+
+rgb2ycbcr <- function(x) {
+  dotp <- x %*% rgb2ycbcr_M
+
+  y <-  rgb2ycbcr_K[1] + dotp[,1]
+  cb <-  rgb2ycbcr_K[2] + dotp[,2]
+  cr <-  rgb2ycbcr_K[3] +  dotp[,3]
+
+  return(cbind(y, cb, cr))
+}
+
+ycbcr2rgb <- function(x) {
+  y  <- x[,1] - rgb2ycbcr_K[1]
+  cb <- x[,2] - rgb2ycbcr_K[2]
+  cr <- x[,3] - rgb2ycbcr_K[3]
+
+  dotp <- cbind(y,cb,cr) %*% ycbcr2rgb_M
+
+  r <- dotp[,1]
+  g <- dotp[,2]
+  b <- dotp[,3]
+
+  return(cbind(r, g, b))
+}
+
+rgb2yuv <- function(x) {
+  dotp <- (x/255) %*% rgb2yuv_M
+
+  y <-  dotp[,1]
+  u <-  dotp[,2]
+  v <-  dotp[,3]
+
+  return(cbind(y, u, v))
+}
+
+yuv2rgb <- function(x) {
+
+  dotp <- (x %*% yuv2rgb_M)*255
+
+  r <- dotp[,1]
+  g <- dotp[,2]
+  b <- dotp[,3]
+
+  return(cbind(r, g, b))
+}
+
+rgb2yiq <- function(x) {
+  dotp <- (x/255) %*% rgb2yiq_M
+
+  y <-  dotp[,1]
+  i <-  dotp[,2]
+  q <-  dotp[,3]
+
+  return(cbind(y, i, q))
+}
+
+yiq2rgb <- function(x) {
+
+  dotp <- (x %*% yiq2rgb_M)*255
+
+  r <- dotp[,1]
+  g <- dotp[,2]
+  b <- dotp[,3]
+
+  return(cbind(r, g, b))
+}
+
+rgb2ryb <- function(x){
+  if(max(x)>1) x <- x/255
+
+  r <- x[,1]
+  g <- x[,2]
+  b <- x[,3]
+
+  whites <- apply(x,1,min)
+  blacks <- apply(1-x,1,min)
+
+  r <- r - whites
+  g <- g - whites
+  b <- b - whites
+
+  ymin <- apply(cbind(r,g),1,min)
+
+  r2 <- r - ymin
+  y2 <- 0.5 * (g + ymin)
+  b2 <- 0.5 * (b + g - ymin)
+
+  denom <- apply(cbind(r,g,b),1,max)
+  denom[denom==0] <- 1
+
+  n <- apply(cbind(r2,y2,b2),1,max) / denom
+  n[n==0] <- 1
+
+  r2 <- r2 / n
+  y2 <- y2 / n
+  b2 <- b2 / n
+
+  r <- r2 + blacks
+  y <- y2 + blacks
+  b <- b2 + blacks
+
+  return(cbind(r,y,b)*255)
+}
+
+ryb2rgb <- function(x){
+  x <- x/255
+
+  r <- x[,1]
+  y <- x[,2]
+  b <- x[,3]
+
+  whites <- apply(x,1,min)
+  blacks <- apply(1-x,1,min)
+
+  r <- r - blacks
+  y <- y - blacks
+  b <- b - blacks
+
+  gmin <- apply(cbind(y,b),1,min)
+
+  r2 <- r + y - gmin
+  g2 <- y + gmin
+  b2 <-  2 * (b - gmin)
+
+  denom <- apply(cbind(r,y,b),1,max)
+  denom[denom==0] <- 1
+
+  n <- apply(cbind(r2,g2,b2),1,max) / denom
+  n[n==0] <- 1
+
+  r2 <- r2 / n
+  g2 <- g2 / n
+  b2 <- b2 / n
+
+  r <- r2 + whites
+  g <- g2 + whites
+  b <- b2 + whites
+
+  return(cbind(r,g,b)*255)
+}
+
+rgb2hwb <- function(x){
+  aux <- farver::convert_colour(x, from = "rgb", to = "hsv")
+  h <- aux[,1]
+  w <- (1-aux[,2])*aux[,3]
+  b <- 1 - aux[,3]
+  return(cbind(h,w,b))
+}
+
+hwb2rgb <- function(x){
+  h <- x[,1]
+  s <- 1 - x[,2]/(1-x[,3])
+  v <- 1 - x[,3]
+
+  aux <- farver::convert_colour(cbind(h,s,v), from = "hsv", to = "rgb")
+  return(aux)
+
+}
+
+color_convert <- function(x, from = NULL, to){
+  if(is.null(from)){
+    from <- "rgb"
+  }
+  if(from != to){
+    if(from %in% all_spaces &
+       to %in% all_spaces){
+      if(is.character(x)){
+        x <- farver::decode_colour(x)
+      }
+      if(from %in% farver_spaces & to %in% farver_spaces){
+        ### cuando es un solo color cmy deja la cagada con las escalas
+        return(farver::convert_colour(x, from=from , to=to))
+      }
+      if(from %in% farver_spaces & !(to %in% farver_spaces)){
+        aux <- farver::convert_colour(x, from=from , to="rgb")
+        out <- fromrgb(aux, to = to)
+        return(out)
+      }
+      if(!(from %in% farver_spaces) & to %in% farver_spaces){
+        aux <- torgb(x, from = from)
+        out <- farver::convert_colour(aux, from="rgb", to=to)
+        return(out)
+      }
+      if(!(from %in% farver_spaces) & !(to %in% farver_spaces)){
+        aux <- torgb(x, from = from)
+        out <- fromrgb(aux, to = to)
+      }
+    } else {
+      message("unsupported format")
+    }
+  } else return(x)
+
+}
+
+toPCS <- function(x, from){}
+torgb <- function(x, from){
+  if(from %in% los_colores_spaces){
+    if(from == "ycbcr") {
+      return(ycbcr2rgb(x))
+    }
+    if(from == "yiq"){
+      return(yiq2rgb(x))
+    }
+    if(from == "yuv"){
+      return(yuv2rgb(x))
+    }
+    if(from == "ryb"){
+      return(ryb2rgb(x))
+    }
+    if(from == "hwb"){
+      return(hwb2rgb(x))
+    }
+  } else {
+    message("unsupported format")
+  }
+}
+
+## case when o switch
+fromPCS <- function(x, to){}
+fromrgb <- function(x, to){
+  if(to %in% los_colores_spaces){
+    if(to == "ycbcr") {
+      return(rgb2ycbcr(x))
+    }
+    if(to == "yiq"){
+      return(rgb2yiq(x))
+    }
+    if(to == "yuv"){
+      return(rgb2yuv(x))
+    }
+    if(to == "ryb"){
+      return(rgb2ryb(x))
+    }
+    if(to == "hwb"){
+      return(rgb2hwb(x))
+    }
+  } else {
+    message("unsupported format")
+  }
+}
+
+
+
+
+

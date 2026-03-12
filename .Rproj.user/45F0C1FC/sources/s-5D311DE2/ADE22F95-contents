@@ -1,0 +1,344 @@
+colours(distinct = TRUE)
+palette.pals()
+palette.colors()
+rainbow(255)
+
+colorRampPalette(c("#413b93", "#524ab7", "#4065B1", "#488BC2", "#55A1B1",
+                           "#63AD99", "#7FB972", "#B5BD4C", "#D9AD3C",
+                           "#E68E34", "#E6642C", "#d94020", "#d92120"))(255)
+
+
+heat.colors(255)
+terrain.colors(255)
+topo.colors(255)
+cm.colors(255)
+hcl.pals()
+hcl.pals("qualitative")
+hcl.pals("sequential")
+hcl.pals("diverging")
+hcl.pals("divergingx")
+
+colorRampPalette(c("red", "green"))(5)
+
+
+
+### Paletas tienen un nombre
+### tienen un vector de colores (codigo hex) ordenado
+### colores a veces tienen un nombre (los ignoraremos por mientras)
+### paletas a veces tienen atributos type y colorblindness
+
+
+## colorbrewer
+
+colorbrewer <- list(
+  Accent =  rgb(c(127,190,253,255,56,240,191,102),
+                c(201,174,192,255,108,2,91,102),
+                c(127,212,134,153,176,127,23,102),maxColorValue=255),
+  Blues = rgb(c(247,222,198,158,107,66,33,8,8),
+              c(251,235,219,202,174,146,113,81,48),
+              c(255,247,239,225,214,198,181,156,107),maxColorValue=255),
+  BrBG =  rgb(c(84,140,191,223,246,245,199,128,53,1,0),
+              c(48,81,129,194,232,245,234,205,151,102,60),
+              c(5,10,45,125,195,245,229,193,143,94,48),maxColorValue=255),
+  BuGn =  rgb(c(247,229,204,153,102,65,35,0,0),
+              c(252,245,236,216,194,174,139,109,68),
+              c(253,249,230,201,164,118,69,44,27),maxColorValue=255),
+  BuPu = rgb(c(247,224,191,158,140,140,136,129,77),
+             c(252,236,211,188,150,107,65,15,0),
+             c(253,244,230,218,198,177,157,124,75),maxColorValue=255),
+  Dark2 =  rgb(c(27,217,117,231,102,230,166,102),
+               c(158,95,112,41,166,171,118,102),
+               c(119,2,179,138,30,2,29,102),maxColorValue=255),
+  GnBu = rgb(c(247,224,204,168,123,78,43,8,8),
+             c(252,243,235,221,204,179,140,104,64),
+             c(240,219,197,181,196,211,190,172,129),maxColorValue=255),
+  Greens = rgb(c(247,229,199,161,116,65,35,0,0),
+               c(252,245,233,217,196,171,139,109,68),
+               c(245,224,192,155,118,93,69,44,27),maxColorValue=255),
+  Greys =     rgb(c(255,240,217,189,150,115,82,37,0),
+                  c(255,240,217,189,150,115,82,37,0),
+                  c(255,240,217,189,150,115,82,37,0),maxColorValue=255),
+  Oranges =    rgb(c(255,254,253,253,253,241,217,166,127),
+                   c(245,230,208,174,141,105,72,54,39),
+                   c(235,206,162,107,60,19,1,3,4),maxColorValue=255),
+  OrRd =     rgb(c(255,254,253,253,252,239,215,179,127),
+                 c(247,232,212,187,141,101,48,0,0),
+                 c(236,200,158,132,89,72,31,0,0),maxColorValue=255),
+  Paired =  rgb(c(166,31,178,51,251,227,253,255,202,106,255,177),
+                c(206,120,223,160,154,26,191,127,178,61,255,89),
+                c(227,180,138,44,153,28,111,0,214,154,153,40),maxColorValue=255),
+  Pastel1 =      rgb(c(251,179,204,222,254,255,229,253,242),
+                     c(180,205,235,203,217,255,216,218,242),
+                     c(174,227,197,228,166,204,189,236,242),maxColorValue=255),
+  Pastel2 =       rgb(c(179,253,203,244,230,255,241,204),
+                      c(226,205,213,202,245,242,226,204),
+                      c(205,172,232,228,201,174,204,204),maxColorValue=255),
+  PiYG =      rgb(c(142,197,222,241,253,247,230,184,127,77,39),
+                  c(1,27,119,182,224,247,245,225,188,146,100),
+                  c(82,125,174,218,239,247,208,134,65,33,25),maxColorValue=255),
+  PRGn =    rgb(c(64,118,153,194,231,247,217,166,90,27,0),
+                c(0,42,112,165,212,247,240,219,174,120,68),
+                c(75,131,171,207,232,247,211,160,97,55,27),maxColorValue=255),
+  PuBu =      rgb(c(255,236,208,166,116,54,5,4,2),
+                  c(247,231,209,189,169,144,112,90,56),
+                  c(251,242,230,219,207,192,176,141,88),maxColorValue=255),
+  PuBuGn = rgb(c(255,236,208,166,103,54,2,1,1),
+               c(247,226,209,189,169,144,129,108,70),
+               c(251,240,230,219,207,192,138,89,54),maxColorValue=255),
+  PuOr =    rgb(c(127,179,224,253,254,247,216,178,128,84,45),
+                c(59,88,130,184,224,247,218,171,115,39,0),
+                c(8,6,20,99,182,247,235,210,172,136,75),maxColorValue=255),
+  PuRd =     rgb(c(247,231,212,201,223,231,206,152,103),
+                 c(244,225,185,148,101,41,18,0,0),
+                 c(249,239,218,199,176,138,86,67,31),maxColorValue=255),
+  Purples =          rgb(c(252,239,218,188,158,128,106,84,63),
+                         c(251,237,218,189,154,125,81,39,0),
+                         c(253,245,235,220,200,186,163,143,125),maxColorValue=255),
+  RdBu =  rgb(c(103,178,214,244,253,247,209,146,67,33,5),
+              c(0,24,96,165,219,247,229,197,147,102,48),
+              c(31,43,77,130,199,247,240,222,195,172,97),maxColorValue=255),
+  RdGy =    rgb(c(103,178,214,244,253,255,224,186,135,77,26),
+                c(0,24,96,165,219,255,224,186,135,77,26),
+                c(31,43,77,130,199,255,224,186,135,77,26),maxColorValue=255),
+  RdPu = rgb(c(255,253,252,250,247,221,174,122,73),
+             c(247,224,197,159,104,52,1,1,0),
+             c(243,221,192,181,161,151,126,119,106),maxColorValue=255),
+  Reds =   rgb(c(255,254,252,252,251,239,203,165,103),
+               c(245,224,187,146,106,59,24,15,0),
+               c(240,210,161,114,74,44,29,21,13),maxColorValue=255),
+  RdYlBu = rgb(c(165,215,244,253,254,255,224,171,116,69,49),
+               c(0,48,109,174,224,255,243,217,173,117,54),
+               c(38,39,67,97,144,191,248,233,209,180,149),maxColorValue=255),
+  RdYlGn =     rgb(c(165,215,244,253,254,255,217,166,102,26,0),
+                   c(0,48,109,174,224,255,239,217,189,152,104),
+                   c(38,39,67,97,139,191,139,106,99,80,55),maxColorValue=255),
+  Set1 =    rgb(c(228,55,77,152,255,255,166,247,153),
+                c(26,126,175,78,127,255,86,129,153),
+                c(28,184,74,163,0,51,40,191,153),maxColorValue=255),
+  Set2 =     rgb(c(102,252,141,231,166,255,229,179),
+                 c(194,141,160,138,216,217,196,179),
+                 c(165,98,203,195,84,47,148,179),maxColorValue=255),
+  Set3 =     rgb(c(141,255,190,251,128,253,179,252,217,188,204,255),
+                 c(211,255,186,128,177,180,222,205,217,128,235,237),
+                 c(199,179,218,114,211,98,105,229,217,189,197,111),maxColorValue=255),
+  Spectral = rgb(c(158,213,244,253,254,255,230,171,102,50,94),
+                 c(1,62,109,174,224,255,245,221,194,136,79),
+                 c(66,79,67,97,139,191,152,164,165,189,162),maxColorValue=255),
+  YlGn =    rgb(c(255,247,217,173,120,65,35,0,0),
+                c(255,252,240,221,198,171,132,104,69),
+                c(229,185,163,142,121,93,67,55,41),maxColorValue=255),
+  YlGnBu =  rgb(c(255,237,199,127,65,29,34,37,8),
+                c(255,248,233,205,182,145,94,52,29),
+                c(217,177,180,187,196,192,168,148,88),maxColorValue=255),
+  YlOrBr =   rgb(c(255,255,254,254,254,236,204,153,102),
+                 c(255,247,227,196,153,112,76,52,37),
+                 c(229,188,145,79,41,20,2,4,6),maxColorValue=255),
+  YlOrRd = rgb(c(255,255,254,254,253,252,227,189,128),
+               c(255,237,217,178,141,78,26,0,0),
+               c(204,160,118,76,60,42,28,38,38),maxColorValue=255)
+)
+
+
+# wesanderson
+wesanderson <- list(
+  BottleRocket1 = c("#A42820", "#5F5647", "#9B110E", "#3F5151", "#4E2A1E", "#550307", "#0C1707"),
+  BottleRocket2 = c("#FAD510", "#CB2314", "#273046", "#354823", "#1E1E1E"),
+  Rushmore1 = c("#E1BD6D", "#EABE94", "#0B775E", "#35274A" ,"#F2300F"),
+  Rushmore = c("#E1BD6D", "#EABE94", "#0B775E", "#35274A" ,"#F2300F"),
+  Royal1 = c("#899DA4", "#C93312", "#FAEFD1", "#DC863B"),
+  Royal2 = c("#9A8822", "#F5CDB4", "#F8AFA8", "#FDDDA0", "#74A089"),
+  Zissou1 = c("#3B9AB2", "#78B7C5", "#EBCC2A", "#E1AF00", "#F21A00"),
+  Darjeeling1 = c("#FF0000", "#00A08A", "#F2AD00", "#F98400", "#5BBCD6"),
+  Darjeeling2 = c("#ECCBAE", "#046C9A", "#D69C4E", "#ABDDDE", "#000000"),
+  Chevalier1 = c("#446455", "#FDD262", "#D3DDDC", "#C7B19C"),
+  FantasticFox1 = c("#DD8D29", "#E2D200", "#46ACC8", "#E58601", "#B40F20"),
+  Moonrise1 = c("#F3DF6C", "#CEAB07", "#D5D5D3", "#24281A"),
+  Moonrise2 = c("#798E87", "#C27D38", "#CCC591", "#29211F"),
+  Moonrise3 = c("#85D4E3", "#F4B5BD", "#9C964A", "#CDC08C", "#FAD77B"),
+  Cavalcanti1 = c("#D8B70A", "#02401B", "#A2A475", "#81A88D", "#972D15"),
+  GrandBudapest1 = c("#F1BB7B", "#FD6467", "#5B1A18", "#D67236"),
+  GrandBudapest2 = c("#E6A0C4", "#C6CDF7", "#D8A499", "#7294D4"),
+  IsleofDogs1 = c("#9986A5", "#79402E", "#CCBA72", "#0F0D0E", "#D9D0D3", "#8D8680"),
+  IsleofDogs2 = c("#EAD3BF", "#AA9486", "#B6854D", "#39312F", "#1C1718")
+)
+
+painbow <- list(painbow_colors = c( '#FFFFFF', '#FEFEFF', '#FAFAFC', '#F4F4F7', '#EBECF1', '#E4E4EC', '#DBDAE6', '#D1D1DE', '#C7C7D5', '#BBBDCB', '#AFB3C3', '#A4A7BA', '#999CB0', '#8F91A6', '#87899D', '#7E8193', '#747788', '#6A6D7C', '#626170', '#575765', '#4C4C57', '#41424B', '#37373E', '#2D2C32', '#242328', '#1B1A1E', '#131313', '#0C0C0A', '#060606', '#010102', '#000000', '#000003', '#00000C', '#000219', '#03092A', '#091239', '#111B49', '#162150', '#1C2756', '#222D5C', '#2A3463', '#333B6A', '#3A4370', '#424B77', '#4A527D', '#515A82', '#576085', '#5D6689', '#606C8B', '#60718C', '#5F758A', '#577985', '#4A7E80', '#407D7B', '#367C72', '#287C69', '#1C7C60', '#147C58', '#0C7D50', '#037D47', '#1E7941', '#247139', '#356632', '#54562B', '#714524', '#8D361D', '#AD2516', '#C91610', '#DF0F0C', '#F20605', '#FD0004', '#FE0302', '#FD0400', '#FD0200', '#FC0401', '#FC0202', '#FA0401', '#F80601', '#F80400', '#F50800', '#F30B01', '#F10A01', '#ED0F00', '#E91101', '#E71302', '#E31401', '#E01400', '#DC1900', '#D91D00', '#D41E00', '#D12001', '#CD2200', '#C52A00', '#C32A00', '#C02B01', '#B83201', '#B53301', '#AF3601', '#AA3A01', '#A63D02', '#A04002', '#9A4502', '#964702', '#914A01', '#8B4F01', '#865202', '#825503', '#7D5904', '#775C03', '#716003', '#6D6304', '#666704', '#606B06', '#5D6F07', '#587207', '#527607', '#4E7908', '#4B7C08', '#467F08', '#418309', '#3E860A', '#38890C', '#348D0C', '#2F900C', '#2E930E', '#2A960E', '#269A0E', '#239D0E', '#1FA00F', '#1CA211', '#1EA411', '#1EA712', '#1CA912', '#1BAC14', '#18AE15', '#13B015', '#0DB216', '#0EB417', '#09B715', '#14BA18', '#13BD1B', '#09C11C', '#0FC41E', '#14C721', '#13CA22', '#1CCC25', '#21CF27', '#27D129', '#2CD32A', '#31D62C', '#37D72F', '#41D932', '#47DB35', '#50DD37', '#57DF3A', '#5CE13D', '#65E23F', '#6BE341', '#76E343', '#80E547', '#85E749', '#8BE84D', '#91E950', '#98EB53', '#A1EB56', '#A7ED58', '#ABEE5B', '#B2EE5E', '#BAEE61', '#BEF064', '#C0F167', '#C5F26A', '#CAF26D', '#CFF173', '#D4F17A', '#D6F181', '#D9F186', '#DBF38B', '#DDF293', '#DEF399', '#E0F29F', '#E2F2A8', '#E3F1AF', '#E3F0B5', '#E4EFBC', '#E4EEC1', '#E5EDC8', '#E5ECCD', '#E6EBD2', '#E6EAD8', '#E7E9DD', '#E7E9E1' ))
+
+## hay que ordenar
+
+# colRoz
+colRoz <- list(
+  p.breviceps = rbind(c("#040403", "#423A31",  "#6E5D54", "#684E2D", "#BEA26C","#F5DEB6"), c(1,2,5,3,4,6)),
+  thylacine = rbind(c("#463732", "#674F37", "#6C5948", "#9A7B5C","#C7B084"), c(1,2,5,3,4)),
+  p.mitchelli = rbind(c("#3F2723", "#F4F4DA","#9B7B66","#DBF379","#4F6A35"), c(1,5,2,4,3)),
+  k.tristis = rbind(c("#3D76A3", "#5EADBE","#5EA176", "#A76123", "#7A4018",  "#B48D48", "#767D76"), c(1,5,7,2,3,6,4)),
+  m.oscellata = rbind(c( "#553945", "#9D758D", "#734631", "#B3956F",  "#554A48", "#8A91A4" ), c(1,3,2,4,6,5)),
+  a.conica = rbind(c("#31241E", "#57302B", "#AD836D", "#45472F", "#5B671F", "#6C8422"), c(4,1,6,3,5,2)),
+  v.viatica = rbind(c("#313632", "#7D8184", "#432B21", "#6B503B", "#B89E83"), c(4,5,1,2,3)),
+  c.brevi = rbind(c( "#800824", "#9A1609","#C4603C","#B53E78", "#6090D2",  "#DC9722", "#DCB78B"), c(5,1,6,2,3,4,7)),
+  a.westwoodi = rbind(c("#0F1309",  "#F86100", "#FF9E00","#897F27", "#C9B13F", "#FFCB7B"), c(2,1,3,4,5,6)),
+  a.plagiata = rbind(c("#1F1A10", "#493823","#9E6E27","#C47E2A", "#FDB958", "#FCE3A8"), c(4,1,5,2,3,6)),
+  physalia = rbind(c( "#061349" ,"#44618C", "#82B4DE" , "#492772",  "#C78EF0", "#3D5537"), c(1,2,3,4,5,6)),
+  c.australasiae = rbind(c("#3C2726", "#767D6D","#6D723A", "#33511C","#3A6722", "#547F47"), c(4,5,6,1,2,3)),
+  k.scurra = rbind(c("#44290C",  "#8A6026", "#BC9B7C", "#4D6706","#6F9703", "#ABC035"), c(1,5,6,3,2,4)),
+  l.vestiens = rbind(c("#342125", "#C04D5C","#F17F2A","#EB9734","#FFB765", "#FFE9C4"), c(4,2,1,5,3,6)),
+  t.australis = rbind(c("#3E3041",  "#8D6486", "#745C5A", "#674232",  "#BA8E69","#C5A99B"), c(1,2,5,3,4,6)),
+  r.aculeatus = rbind(c("#7B6E18","#24566D","#617764","#9DD2CB","#B3C29A","#BBCC64"), c(1,2,3,4,5,6)),
+  n.violacea = rbind(c("#301E48","#796D9D","#DDDAEF","#F9E011","#D9B523","#946D2A"), c(1,2,4,5,3,6)),
+  xantho = rbind(c("#736F66","#1D1C1A","#2E3F13","#90A53E","#E1AF4C","#A36407"), c(1,6,5,2,4,3)),
+  a.ramsayi = rbind(c("#17170b", "#422811","#5a3111","#a06322","#e9c74a" ,"#f5eacc"),c(1,5,2,3,4,6)),
+  p.cincta = rbind(c("#CFC7C4","#75767A","#DCA074","#994B1E","#593C2A","#1B1110"), c(6,1,2,3,4,5)),
+  c.azureus = rbind(c("#2E3780","#384AB3","#7C444D","#A34D36","#B4AFAF","#272A28"), c(1,4,2,5,3,6)),
+  m.cyaneus = rbind(c("#659FCB","#05090F","#477173","#22372C","#3A6C4E"), c(1,2,4,5,3)),
+  d.novae = rbind(c( "#252523", "#496161", "#4C2715", "#573C21","#845736", "#9E7F60"), c(4,3,1,5,2,6)),
+  uluru = rbind(c("#543813","#E4733B","#D9842A","#DAB77F","#CFE0D8","#9CC3E0","#5981BC"), c(1,7,5,2,6,4,3)),
+  shark_bay = rbind(c( "#343530", "#636051", "#A0A384","#A3BECF","#93B9AC", "#BDD6C3"), c(1,3,2,4,5,6)),
+  sky = rbind(c( "#9dbfda","#6fa3dd", "#588ece","#336aaa","#295a9c","#1b4287"), c(4,1,5,2,6,3)),
+  desert_sunset = rbind(c( "#626063", "#ad5e59","#fd7c45","#faba62","#ffffbb","#bbdadc"), c(5,1,2,3,6,4)),
+  desert_dusk = rbind(c("#040605", "#0a183f","#1c407a","#a1a4b7","#f2bfa4","#ffd585"), c(6,5,1,2,3,4)),
+  desert_flood = rbind(c("#552c10", "#865b48","#343611","#515530","#977f7d","#d3b696"), c(1,6,5,2,3,4)),
+  salt_lake = rbind(c("#1b396d", "#3e88b9","#34362b","#b6bfbe","#5d3f27","#c7b29d"), c(1,2,4,5,3,6)),
+  daintree = rbind(c("#020401","#101e07","#2a4613","#374e0a","#7d8b3c"), c(5,1,2,4,3)),
+  spinifex = rbind(c("#10100e","#697573","#384a22", "#8d8b4e","#d6aa85","#e4e6d1"), c(4,5,1,2,3,6)),
+  nq_stream = rbind(c("#808314","#DCDB43","#C5DFF4","#323526","#534C2E"),c(1,3,5,2,4)),
+  kimberley = rbind(c("#322419","#291A17","#534546","#D3CCC8","#8F7772"), c(5,1,2,3,4)),
+  capricorn = rbind(c("#2F2E0F", "#8D7046","#67331E","#844522", "#2A61A2", "#619DC1" ), c(4,5,6,1,2,3)),
+  c.decresii = rbind(c("#DCA761","#C6C16D","#8B9C94","#628CA5","#5A6C7A", "#514F5C"),c(1,5,4,2,5,3)),
+  c.kingii = rbind(c("#E38A22","#939114","#F0E6C6","#6E5A16","#DECB21"),c(1,2,5,3,4)),
+  e.leuraensis = rbind(c("#e2b745","#e3bb88","#988e42","#4e3d1d", "#1b1702"),c(3,5,1,2,4)),
+  i.lesueurii = rbind(c("#5A2D27","#888238","#BCD7EA","#6D7F7F","#172530"),c(1,2,5,4,3)),
+  l.boydii = rbind(c("#2A1805","#122B08","#D7D38C","#4B5012","#95C247"),c(5,1,2,4,3)),
+  m.horridus = rbind(c("#6F2305","#D29155","#975428","#477298","#224263"),c(4,5,1,2,3)),
+  m.horridus2 = rbind(c("#DCA25D","#E8C999","#6C3921","#26130E","#C29153"),c(4,5,1,2,3)),
+  t.nigrolutea = rbind(c("#FFDAA0","#B29952","#A38847","#F9A338","#867673", "#0F120F"),c(6,5,4,1,2,3)),
+  v.acanthurus = rbind(c("#F1CFA2","#F8BC64", "#E68B47","#BD6E39","#4A2C22"),c(5,4,1,2,3)),
+  v.pilbarensis = rbind(c("#EDAA6A","#41230E","#B0612D","#743F1C","#120906"),c(1,2,3,4,5)),
+  n.levis = rbind(c("#080808","#5e596f", "#9a7354", "#dca57e","#f6fcd0","#c5e4f6"),c(4,3,1,2,6,5)),
+  s.spinigerus = rbind(c("#18181a","#848178","#c6c7c2","#815b37", "#e3c77c","#feff99"),c(4,1,5,2,3,6)),
+  e.kingii = rbind(c("#412A26", "#583423","#765B4C","#85797A","#E0AE74", "#F7ECE6"), c(5,1,2,4,3,6)),
+  grandis = rbind(c("#911B1B", "#985775","#BAAE94","#DE7184","#74892E","#FF9A6E"),c(1,2,3,4,5,6)),
+  flavolineata = rbind(c("#573333","#E0C5BE","#FDD41A", "#D3AD64", "#7A5D55","#DE5C00"),c(1,6,5,3,4,2)),
+  whitei = rbind(c("#E5A430", "#9C7210","#D7A8B8", "#BAB24F", "#392821", "#9B391B"),c(1,3,6,5,4,2)),
+  picta = rbind(c("#EED4C5","#835D4A", "#D2A19A", "#F3AC5E", "#130B08", "#B77897"),c(6,4,5,1,2,3)),
+  virgo = rbind(c("#7E8E2C", "#372815", "#5A5F9D", "#732405", "#FECA64", "#457D60"),c(1,2,3,4,5,6)),
+  ngadju = rbind(c("#3D2E27","#664D51", "#BF6938", "#F3B65D", "#9D9C42", "#EBDECE"),c(4,5,1,2,3,6))
+)
+
+for(pal in 1:length(colRoz)){
+  subpal <- colRoz[[pal]]
+
+  colRoz[[pal]] <- subpal[ 1, order(subpal[2,])]
+
+}
+
+
+# MetPalettes
+metpalettes <- list(
+  Austria = list(c("#a40000", "#16317d", "#007e2f", "#ffcd12", "#b86092", "#721b3e", "#00b7a7"), c(1, 2, 3, 4, 6, 5, 7), colorblind=FALSE),
+  Cassatt1 = list(c("#b1615c", "#d88782", "#e3aba7", "#edd7d9", "#c9c9dd", "#9d9dc7", "#8282aa", "#5a5a83"), c(3, 6, 1, 8, 4, 5, 2, 7), colorblind=TRUE),
+  Cassatt2 = list(c("#2d223c", "#574571", "#90719f", "#b695bc", "#dec5da", "#c1d1aa", "#7fa074", "#466c4b", "#2c4b27", "#0e2810"), c(7, 3, 9, 1, 5, 6, 2, 10, 4, 8), colorblind=TRUE),
+  Cross = list(c("#c969a1", "#ce4441", "#ee8577", "#eb7926", "#ffbb44", "#859b6c", "#62929a", "#004f63", "#122451"), c(4, 7, 1, 8, 2, 6, 3, 5, 9), colorblind=FALSE),
+  Degas = list(c("#591d06", "#96410e", "#e5a335", "#556219", "#418979", "#2b614e", "#053c29"), c(5, 2, 1, 3, 4, 7, 6), colorblind=FALSE),
+  Derain = list(c("#efc86e", "#97c684", "#6f9969", "#aab5d5", "#808fe1", "#5c66a8", "#454a74"), c(4, 2, 5, 7, 1, 3, 6), colorblind=TRUE),
+  Egypt = list(c("#dd5129", "#0f7ba2", "#43b284", "#fab255"), c(1, 2, 3, 4), colorblind=TRUE),
+  Gauguin = list(c("#b04948", "#811e18", "#9e4013", "#c88a2c", "#4c6216", "#1a472a"), c(2, 5, 4, 3, 1, 6), colorblind=FALSE),
+  Greek = list(c("#3c0d03", "#8d1c06", "#e67424", "#ed9b49", "#f5c34d"), c(2, 3, 5, 1, 4), colorblind=TRUE),
+  Hiroshige = list(c("#e76254", "#ef8a47", "#f7aa58", "#ffd06f", "#ffe6b7", "#aadce0", "#72bcd5", "#528fad", "#376795", "#1e466e"), c(6, 2, 9, 3, 7, 5, 1, 10, 4, 8), colorblind=TRUE),
+  Hokusai1 = list(c("#6d2f20", "#b75347", "#df7e66", "#e09351", "#edc775", "#94b594", "#224b5e"), c(2, 7, 4, 6, 5, 1, 3), colorblind=FALSE),
+  Hokusai2 = list(c("#abc9c8", "#72aeb6", "#4692b0", "#2f70a1", "#134b73", "#0a3351"), c(5, 2, 4, 1, 6, 3), colorblind=TRUE),
+  Hokusai3 = list(c("#d8d97a", "#95c36e", "#74c8c3", "#5a97c1", "#295384", "#0a2e57"), c(4, 2, 5, 3, 1, 6), colorblind=TRUE),
+  Homer1 = list(c("#551f00", "#a62f00", "#df7700", "#f5b642", "#fff179", "#c3f4f6", "#6ad5e8", "#32b2da"), c(6, 3, 2, 7, 4, 8, 5, 1), colorblind=FALSE),
+  Homer2 = list(c("#bf3626", "#e9724c", "#e9851d", "#f9c53b", "#aeac4c", "#788f33", "#165d43"), c(3, 7, 1, 4, 6, 2, 5), colorblind=FALSE),
+  Ingres= list(c("#041d2c", "#06314e", "#18527e", "#2e77ab", "#d1b252", "#a97f2f", "#7e5522", "#472c0b"), c(4, 5, 3, 6, 2, 7, 1, 8), colorblind=TRUE),
+  Isfahan1 = list(c("#4e3910", "#845d29", "#d8c29d", "#4fb6ca", "#178f92", "#175f5d", "#1d1f54"), c(5, 2, 4, 6, 1, 7, 3), colorblind=TRUE),
+  Isfahan2 = list(c("#d7aca1", "#ddc000", "#79ad41", "#34b6c6", "#4063a3"), c(4, 2, 3, 5, 1), colorblind=TRUE),
+  Juarez = list(c("#a82203", "#208cc0", "#f1af3a", "#cf5e4e", "#637b31", "#003967"), c(1, 2, 3, 4, 5, 6), colorblind=FALSE),
+  Klimt = list(c("#df9ed4", "#c93f55", "#eacc62", "#469d76", "#3c4b99", "#924099"), c(5, 2, 3, 4, 6, 1), colorblind=FALSE),
+  Lakota = list(c("#04a3bd", "#f0be3d", "#931e18", "#da7901", "#247d3f", "#20235b"), c(1, 2, 3, 4, 5, 6), colorblind=FALSE),
+  Manet = list(c("#3b2319", "#80521c", "#d29c44", "#ebc174", "#ede2cc", "#7ec5f4", "#4585b7", "#225e92", "#183571", "#43429b", "#5e65be"), c(8, 3, 10, 4, 7, 9, 11, 2, 6, 1, 5), colorblind=FALSE),
+  Monet = list(c("#4e6d58", "#749e89", "#abccbe", "#e3cacf", "#c399a2", "#9f6e71", "#41507b", "#7d87b2", "#c2cae3"), c(2, 5, 8, 3, 4, 9, 1, 6, 7), colorblind=FALSE),
+  Moreau = list(c("#421600", "#792504", "#bc7524", "#8dadca", "#527baa", "#104839", "#082844"), c(2, 5, 3, 4, 7, 1, 6), colorblind=FALSE),
+  Morgenstern = list(c("#7c668c", "#b08ba5", "#dfbbc8", "#ffc680", "#ffb178", "#db8872", "#a56457"), c(7, 5, 4, 6, 3, 2, 1), colorblind=TRUE),
+  Nattier = list(c("#52271c", "#944839", "#c08e39", "#7f793c", "#565c33", "#184948", "#022a2a"), c(1, 6, 3, 4, 7, 2, 5), colorblind=FALSE),
+  Navajo = list(c("#660d20", "#e59a52", "#edce79", "#094568", "#e1c59a"), c(1, 2, 3, 4, 5), colorblind=FALSE),
+  NewKingdom = list(c("#e1846c", "#9eb4e0", "#e6bb9e", "#9c6849", "#735852"), c(2, 1, 3, 4, 5), colorblind=FALSE),
+  Nizami = list(c("#dd7867", "#b83326", "#c8570d", "#edb144", "#8cc8bc", "#7da7ea", "#5773c0", "#1d4497"), c(5, 2, 6, 8, 3, 7, 4, 1), colorblind=FALSE),
+  OKeeffe1 = list(c("#6b200c", "#973d21", "#da6c42", "#ee956a", "#fbc2a9", "#f6f2ee", "#bad6f9", "#7db0ea", "#447fdd", "#225bb2", "#133e7e"), c(8, 6, 1, 4, 10, 3, 11, 5, 2, 7, 9), colorblind=TRUE),
+  OKeeffe2 = list(c("#fbe3c2", "#f2c88f", "#ecb27d", "#e69c6b", "#d37750", "#b9563f", "#92351e"), c(7, 1, 6, 4, 2, 5, 3), colorblind=TRUE),
+  Peru1 = list(c("#b5361c", "#e35e28", "#1c9d7c", "#31c7ba", "#369cc9", "#3a507f"), c(3, 1, 5, 2, 4, 6), colorblind=FALSE),
+  Peru2 = list(c("#65150b", "#961f1f", "#c0431f", "#b36c06", "#f19425", "#c59349", "#533d14"), c(4, 1, 3, 5, 2, 7, 6), colorblind=FALSE),
+  Pillement = list(c("#a9845b", "#697852", "#738e8e", "#44636f", "#2b4655", "#0f252f"), c(4, 3, 2, 5, 1, 6), colorblind=TRUE),
+  Pissaro = list(c("#134130", "#4c825d", "#8cae9e", "#8dc7dc", "#508ca7", "#1a5270", "#0e2a4d"), c(6, 2, 4, 1, 7, 5, 3), colorblind=FALSE),
+  Redon = list(c("#5b859e", "#1e395f", "#75884b", "#1e5a46", "#df8d71", "#af4f2f", "#d48f90", "#732f30", "#ab84a5", "#59385c", "#d8b847", "#b38711"), c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12), colorblind=FALSE),
+  Renoir = list(c("#17154f", "#2f357c", "#6c5d9e", "#9d9cd5", "#b0799a", "#f6b3b0", "#e48171", "#bf3729", "#e69b00", "#f5bb50", "#ada43b", "#355828"), c(2, 5, 9, 12, 3, 8, 7, 10, 4, 1, 6, 11), colorblind=FALSE),
+  Robert = list(c("#11341a", "#375624", "#6ca4a0", "#487a7c", "#18505f", "#062e3d"), c(2, 5, 3, 1, 6, 4), colorblind=FALSE),
+  Signac = list(c("#fbe183", "#f4c40f", "#fe9b00", "#d8443c", "#9b3441", "#de597c", "#e87b89", "#e6a2a6", "#aa7aa1", "#9f5691", "#633372", "#1f6e9c", "#2b9b81", "#92c051"), c(13, 3, 2, 1, 11, 5, 8, 14, 12, 10, 7, 4, 6, 9), colorblind=FALSE),
+  Stevens = list(c("#042e4e", "#307d7f", "#598c4c", "#ba5c3f", "#a13213", "#470c00"), c(4, 2, 3, 5, 1, 6), colorblind=FALSE),
+  Tara = list(c("#eab1c6", "#d35e17", "#e18a1f", "#e9b109", "#829d44"), c(1, 3, 2, 5, 4), colorblind=FALSE),
+  Thomas = list(c("#b24422", "#c44d76", "#4457a5", "#13315f", "#b1a1cc", "#59386c", "#447861", "#7caf5c"), c(3, 2, 8, 6, 1, 4, 7, 5), colorblind=FALSE),
+  Tiepolo = list(c("#802417", "#c06636", "#ce9344", "#e8b960", "#646e3b", "#2b5851", "#508ea2", "#17486f"), c(1, 2, 8, 4, 3, 5, 7, 6), colorblind=FALSE),
+  Troy = list(c("#421401", "#6c1d0e", "#8b3a2b", "#c27668", "#7ba0b4", "#44728c", "#235070", "#0a2d46"), c(2, 7, 4, 5, 1, 8, 3, 6), colorblind=TRUE),
+  Tsimshian = list(c("#582310", "#aa361d", "#82c45f", "#318f49", "#0cb4bb", "#2673a3", "#473d7d"), c(6, 1, 7, 4, 1, 5, 3), colorblind=FALSE),
+  VanGogh1 = list(c("#2c2d54", "#434475", "#6b6ca3", "#969bc7", "#87bcbd", "#89ab7c", "#6f9954"), c(3, 5, 7, 4, 6, 2, 1), colorblind=FALSE),
+  VanGogh2 = list(c("#bd3106", "#d9700e", "#e9a00e", "#eebe04", "#5b7314", "#c3d6ce", "#89a6bb", "#454b87"), c(1, 5, 8, 2, 7, 4, 6, 3), colorblind=FALSE),
+  VanGogh3 = list(c("#e7e5cc", "#c2d6a4", "#9cc184", "#669d62", "#447243", "#1f5b25", "#1e3d14", "#192813"), c(7, 5, 1, 4, 8, 2, 3, 6), colorblind=TRUE),
+  Veronese = list(c("#67322e", "#99610a", "#c38f16", "#6e948c", "#2c6b67", "#175449", "#122c43"), c(5, 1, 7, 2, 3, 6, 4), colorblind=TRUE),
+  Wissing = list(c("#4b1d0d", "#7c291e", "#ba7233", "#3a4421", "#2d5380"), c(2, 3, 5, 4, 1), colorblind=FALSE)
+
+)
+
+for(pal in 1:length(metpalettes)){
+  subpal <- metpalettes[[pal]]
+
+  metpalettes[[pal]] <-   list( subpal[[1]][ order(subpal[[2]])], colorblind = subpal[[3]])
+
+}
+
+
+source("R/viridis.R")
+viridis <- list()
+viridis.map <- cbind(rgb(viridis.map[1:3]), viridis.map[4])
+for(pal in unique(viridis.map$opt)){
+  subpal <- viridis.map[viridis.map$opt == pal,]
+
+  subpal <- list(subpal[,1], pal = pal)
+
+  viridis <- c(viridis, subpal)
+}
+
+
+load("C:/Users/raimu/Dropbox/Github/loscolores/R/canva_palettes.rda")
+
+
+
+
+load("C:/Users/raimu/Dropbox/Github/loscolores/R/scico.rda")
+scico <- palettes
+rm(palettes)
+for(pal in 1:length(scico)){
+  subpal <- scico[[pal]]
+
+  scico[[pal]] <- rgb(subpal[3:5])
+}
+
+
+cartocols <- list()
+load("C:/Users/raimu/Dropbox/Github/loscolores/R/cartocolors.rda")
+load("C:/Users/raimu/Dropbox/Github/loscolores/R/metacartocolors.rda")
+
+for(pal in 1:nrow(cartocolors)){
+  subpal <- cartocolors[pal,]
+  subpal <- subpal[,subpal != "NULL"]
+  subpal <- subpal[,c(1,2,ncol(subpal))]
+
+  subpal <- list(subpal[,3], colorblind = metacartocolors$Colorblind_friendly[pal])
+
+  cartocols <- c(cartocols, subpal)
+}
+
+
+load("C:/Users/raimu/Dropbox/Github/loscolores/R/ggsci.rda")
+
+
+load("C:/Users/raimu/Dropbox/Github/loscolores/R/ggthemes_data.rda")
+

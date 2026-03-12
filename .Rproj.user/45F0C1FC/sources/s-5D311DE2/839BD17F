@@ -1,0 +1,24 @@
+{
+    "id": "839BD17F",
+    "path": "C:/Users/Raimundo/Dropbox/Github/loscolores/R/2.palette_display.R",
+    "project_path": "R/2.palette_display.R",
+    "type": "r_source",
+    "hash": "609944397",
+    "contents": "",
+    "dirty": false,
+    "created": 1640615822819.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "14|35|24|0|\n29|86|105|2|\n132|41|174|0|\n191|51|224|0|\n240|35|250|0|\n270|66|278|0|\n282|42|293|0|\n309|45|315|0|\n338|81|374|0|\n470|1|713|0|\n718|40|735|0|\n741|47|750|0|\n756|1|805|0|\n878|1|1022|0|\n1124|1|1350|0|\n1359|35|1369|0|\n1405|65|1417|0|\n1423|35|1433|0|\n",
+    "lastKnownWriteTime": 1640557044,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1640615894762,
+    "read_only": false,
+    "read_only_alternatives": []
+}

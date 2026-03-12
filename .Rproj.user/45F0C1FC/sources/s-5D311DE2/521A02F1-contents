@@ -1,0 +1,1510 @@
+# color spaces
+# transforma entre espacios de color
+# rgb
+# CMY
+# CMYK
+# hsv
+# hsl
+# YIQ
+# YUV
+# YCbCr
+# CIELAB
+
+##  The following color spaces are available:
+##
+##     RGB       linearized sRGB space
+##     sRGB      Gamma-corrected sRGB space
+##     XYZ       CIE-XYZ space
+##     LAB       CIE-L*a*b* space
+##     polarLAB  CIE-L*a*b* space in polar coordinates
+##     HSV       Hue-Saturation-Value
+##     LUV       CIE-L*u*v*
+##     polarLUV  CIE-L*u*v* in polar coordinates (HCL)
+##     HLS       Hue-Lightness-Saturation
+
+# cromatic variants
+
+# acromatic
+# monocromatic
+# deuteranopia
+# pronatopia
+# tritanopia
+
+
+
+# color attributes
+# temperature
+# hue
+# saturation
+# brighness
+
+
+#' Distance Between Colors
+#'
+#' Calculation of the distances between the colors in the input palette.
+#' It also allows for calculation of the distances between the colors in a simulations of the  color vision deficiency - deuteranopia, protanopia, and tritanopia.
+#'
+#' @param x A vector of hexadecimal color descriptions
+#' @param cvd A type of color vision deficiency (CVD): "pro" (protanomaly), "deu" (deutanomaly), or "tri" (tritanomaly)
+#' @param severity Severity of the color vision defect, a number between 0 and 1
+#' @param metric A vector of color metric specifiers. Valid values are '1976', '1994', and '2000' (default), which refer to the year the metric  was recommended by the CIE
+#'
+#' @return A matrix of distances between the original input palette and a simulation of the  selected color vision deficiency - deuteranopia, protanopia, and tritanopia
+#' @export
+#'
+#' @examples
+#' rainbow_pal = rainbow(n = 7)
+#' rainbow_pal
+#' palette_dist(rainbow_pal)
+#' palette_dist(rainbow_pal, cvd = "deu")
+#'
+#' x = rcartocolor::carto_pal(11, "Vivid")
+#' palette_dist(x)
+#' palette_dist(x, cvd = "pro", severity = 1)
+#' palette_dist(x, cvd = "pro", severity = 0.2)
+#'
+palette_dist = function(x, cvd = NULL, severity = 1, metric = 2000){
+
+  if (!is.null(cvd)){
+    x = switch(
+      cvd,
+      deu = colorspace::deutan(x, severity = severity),
+      pro = colorspace::protan(x, severity = severity),
+      tri = colorspace::tritan(x, severity = severity)
+    )
+  }
+
+  a = methods::as(colorspace::hex2RGB(x), "LAB")@coords
+  a_list = lapply((1:dim(a)[1]), function(x) a[x[1], ])
+
+  a_output = lapply(a_list, spacesXYZ::DeltaE, a, metric = metric)
+  a_output = do.call(rbind, a_output)
+
+  a_output[lower.tri(a_output, diag = TRUE)] = NA
+  a_output
+}
+
+
+adjust_hcl <- function(col, h = 0, c = 0, l = 0, method = "relative", fixup = TRUE, maxchroma = TRUE)
+{
+  ## method
+  method <- match.arg(method, c("relative", "absolute"))
+
+  ## number of colors
+  n <- max(c(length(col), length(h), length(c), length(l)))
+  col <- rep_len(col, length.out = n)
+  h <- rep_len(h, length.out = n)
+  c <- rep_len(c, length.out = n)
+  l <- rep_len(l, length.out = n)
+
+  ## col has to be hex code, otherwise col2rgb is used
+  if(is.character(col) &&
+     (all(substr(col, 1L, 1L) == "#") & all(nchar(col) %in% c(7L, 9L))))
+  {
+    ## extract alpha from hex (if any)
+    alpha <- substr(col, 8L, 9L)
+    ## retain only RGB in hex
+    col <- substr(col, 1L, 7L)
+    ## convert to colorspace::RGB
+    col <- hex2RGB(col)
+  } else {
+    col <- col2rgb(col, alpha = TRUE)
+    ## extract alpha values (if non-FF)
+    alpha <- format(as.hexmode(col[4L, ]), width = 2L, upper.case = TRUE)
+    alpha[alpha == "FF"] <- ""
+    ## retain only RGB
+    col <- RGB(t(col[1L:3L, ])/255)
+  }
+
+  ## convert to HCL and remove chroma
+  col <- as(col, "polarLUV")
+  ## fix-up extreme luminance cases
+  col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+  ## transform coordinates
+  if(method == "relative") {
+    col@coords[, "H"] <- col@coords[, "H"] *  (1 + h)
+    col@coords[, "C"] <- col@coords[, "C"] *  (1 + c)
+    col@coords[, "L"] <- col@coords[, "L"] *  (1 + l)
+  } else {
+    col@coords[, "H"] <- col@coords[, "H"] + h * 360
+    col@coords[, "C"] <- col@coords[, "C"] + c * 100
+    col@coords[, "L"] <- col@coords[, "L"] + l * 100
+  }
+  col@coords[, "C"] <- pmin(100, pmax(0, col@coords[, "C"]))
+  col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+  if(maxchroma) {
+    col@coords[, "C"] <- pmin(col@coords[, "C"], max_chroma(col@coords[, "H"], col@coords[, "L"]))
+  }
+
+  ## convert back to hex and add alpha again (if any)
+  col <- hex(col, fixup = fixup)
+  col[!is.na(col)] <- paste(col[!is.na(col)], alpha[!is.na(col)], sep = "")
+  return(col)
+}
+
+
+## turn colors lighter or darker in either HCL or HLS space
+lightdark <- function(col, amount = 0.1,
+                      method = "relative", space = c("HLS", "HCL"), fixup = TRUE)
+{
+  ## method
+  space <- match.arg(space, c("HLS", "HCL"))
+  method <- match.arg(method, c("relative", "absolute"))
+
+  ## number of colors
+  n <- max(c(length(col), length(amount)))
+  col <- rep_len(col, length.out = n)
+  amount <- rep_len(amount, length.out = n)
+
+  ## col has to be hex code, otherwise col2rgb is used
+  if(is.character(col) &&
+     (all(substr(col, 1L, 1L) == "#") & all(nchar(col) %in% c(7L, 9L))))
+  {
+    ## extract alpha from hex (if any)
+    alpha <- substr(col, 8L, 9L)
+    ## retain only RGB in hex
+    col <- substr(col, 1L, 7L)
+    ## convert to colorspace::RGB
+    col <- hex2RGB(col)
+  } else {
+    col <- col2rgb(col, alpha = TRUE)
+    ## extract alpha values (if non-FF)
+    alpha <- format(as.hexmode(col[4L, ]), width = 2L, upper.case = TRUE)
+    alpha[alpha == "FF"] <- ""
+    ## retain only RGB
+    col <- RGB(t(col[1L:3L, ])/255)
+  }
+
+  if(space == "HCL") {
+    ## convert to HCL and remove chroma
+    col <- as(col, "polarLUV")
+    ## fix-up extreme luminance cases
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+    ## transform luminance
+    Lold <- col@coords[, "L"]
+    col@coords[, "L"] <- if(method == "relative") {
+      Lold * (1 + amount)
+    } else {
+      Lold + amount * 100
+    }
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+    ## transform chroma correspondingly (relative to maximum chroma possible)
+    col@coords[, "C"] <- col@coords[, "C"]/ceiling(max_chroma(col@coords[, "H"], Lold) + 1e-8) *
+      max_chroma(col@coords[, "H"], col@coords[, "L"], floor = TRUE)
+    col@coords[, "C"] <- pmin(100, pmax(0, col@coords[, "C"]))
+  } else {
+    col <- as(col, "HLS")
+    col@coords[, "L"] <- if(method == "relative") {
+      col@coords[, "L"] * (1 + amount)
+    } else {
+      col@coords[, "L"] + amount
+    }
+    col@coords[, "L"] <- pmin(1, pmax(0, col@coords[, "L"]))
+  }
+
+  ## convert back to hex and add alpha again (if any)
+  col <- hex(col, fixup = fixup)
+  col[!is.na(col)] <- paste(col[!is.na(col)], alpha[!is.na(col)], sep = "")
+  return(col)
+}
+
+
+if(FALSE) {
+  ## code
+  library("colorspace")
+  pal <- function(col, border = "light gray") {
+    n <- length(col)
+    plot(0, 0, type="n", xlim = c(0, 1), ylim = c(0, 1), axes = FALSE, xlab = "", ylab = "")
+    rect(0:(n-1)/n, 0, 1:n/n, 1, col = col, border = border)
+  }
+
+  ## fairly dark/colorful colors --> turn lighter
+  cl <- rainbow_hcl(5)
+
+  ## HLS vs. HCL --> HCL is much more balanced
+  par(mfrow = c(3, 2), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(lightdark(cl, 0.15))
+  pal(lightdark(cl, 0.15, space = "HCL"))
+  pal(lightdark(cl, 0.30))
+  pal(lightdark(cl, 0.30, space = "HCL"))
+
+
+  ## fairly light colors --> turn darker
+  cl <- rainbow_hcl(5, l = 90, c = 35)
+
+  ## HLS vs. HCL --> HCL is much more balanced
+  par(mfrow = c(3, 2), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(lightdark(cl, -0.15))
+  pal(lightdark(cl, -0.15, space = "HCL"))
+  pal(lightdark(cl, -0.30))
+  pal(lightdark(cl, -0.30, space = "HCL"))
+
+
+  ## fairly light colors --> turn darker
+  ## http://stackoverflow.com/questions/30219738/is-there-a-way-to-programmatically-darken-the-color-given-rgb-values
+  cl <- c("#CDE4F3","#E7F3D3","#F7F0C7","#EFCFE5","#D0D1E7")
+
+  ## HLS vs. HCL --> HCL becomes darker but not more colorful...
+  par(mfrow = c(3, 2), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(lightdark(cl, -0.15))
+  pal(lightdark(cl, -0.15, space = "HCL"))
+  pal(lightdark(cl, -0.30))
+  pal(lightdark(cl, -0.30, space = "HCL"))
+
+}
+
+if ( FALSE ) {
+
+  # ----------------------------------------------------------------
+  # Development function to get multi-hue diverging color maps
+  # ----------------------------------------------------------------
+  multiverge_hcl <- function(n,h=c(10,100,230,290),l=60,lmax=90,fixup=FALSE) {
+
+    C <- seq(0, min(max_chroma(h,l)), length.out = n)
+    L <- seq(lmax, l, length.out = n)
+    cols <- matrix("NA",ncol=length(h),nrow=n)
+    for ( i in 1:ncol(cols) ) {
+      cols[,i] <- hex(polarLUV(H=h[i],C=C,L=L),fixup)
+    }
+    attr(cols,"H") <- h
+    attr(cols,"C") <- C
+    attr(cols,"L") <- L
+
+    cols
+  }
+
+  # ----------------------------------------------------------------
+  # Development function to show the color map properties
+  # ----------------------------------------------------------------
+  showcols <- function(cols) {
+    opar <- par(no.readonly=TRUE); on.exit(par(opar))
+    par(ask=TRUE)
+    par(mfrow=c(ncol(cols),1),mar=c(0,3,0,0),oma=rep(0,4),xaxt='n',yaxt='n')
+    for ( i in 1:ncol(cols) ) {
+      image(matrix(1:nrow(cols)),col=cols[,i])
+      mtext(side=2,attr(cols,"H")[i])
+    }
+
+    # Show space
+    h <- attr(cols,"H")
+    res <- matrix(NA,ncol=length(h),nrow=101)
+    for ( i in seq_along(h) ) {
+      names   <- sprintf("%d-%d",round(h[i]),0:100)
+      res[,i] <- as.numeric(tab[names(tab) %in% names])
+    }
+    par(mar=c(4,4,2,1),xaxt='s',yaxt='s',mfrow=c(1,1),xaxs='i',yaxs='i')
+    plot(0,xlim=c(0,max(res)),ylim=c(0,100),type="n",main="Space Check",
+         xlab="Chroma", ylab="Luminance")
+    for ( i in 1:length(h) ) {
+      lines(res[,i],0:100,col=cols[nrow(cols),i])
+    }
+    points(attr(cols,'C'),attr(cols,'L'))
+  }
+
+  # ----------------------------------------------------------------
+  # A working set
+  # ----------------------------------------------------------------
+  h <- c(10,100,230,290)
+  l <- 50
+  lmax <- 90
+  cols <- multiverge_hcl(10,h=h,l=l,lmax=lmax)
+  showcols(cols)
+
+  # ----------------------------------------------------------------
+  # Fixup=FALSE, wherefore we have missing colors here (non-working
+  # example, even if a fixup would lead to quite good results)
+  # ----------------------------------------------------------------
+  h <- c(10,290)
+  l <- 70
+  lmax <- 99
+  cols <- multiverge_hcl(10,h=h,l=l,lmax=lmax)
+  showcols(cols)
+
+}
+
+
+lightdark2 <- function(col, amount = 0.1,
+                       method = "relative", space = c("HLS", "HCL", "combined"), fixup = TRUE)
+{
+  ## method
+  space <- match.arg(space, c("HLS", "HCL", "combined"))
+  method <- match.arg(method, c("relative", "absolute"))
+
+  ## number of colors
+  n <- max(c(length(col), length(amount)))
+  col <- rep_len(col, length.out = n)
+  amount <- rep_len(amount, length.out = n)
+
+  ## col has to be hex code, otherwise col2rgb is used
+  if(is.character(col) &&
+     (all(substr(col, 1L, 1L) == "#") & all(nchar(col) %in% c(7L, 9L))))
+  {
+    ## extract alpha from hex (if any)
+    alpha <- substr(col, 8L, 9L)
+    ## retain only RGB in hex
+    col <- substr(col, 1L, 7L)
+    ## convert to colorspace::RGB
+    col <- hex2RGB(col)
+  } else {
+    col <- col2rgb(col, alpha = TRUE)
+    ## extract alpha values (if non-FF)
+    alpha <- format(as.hexmode(col[4L, ]), width = 2L, upper.case = TRUE)
+    alpha[alpha == "FF"] <- ""
+    ## retain only RGB
+    col <- RGB(t(col[1L:3L, ])/255)
+  }
+
+  if (space == "HCL") {
+    ## *** darkening/lightening in HCL space ***
+
+    ## convert to HCL and remove chroma
+    col <- as(col, "polarLUV")
+    ## fix-up extreme luminance cases
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+    ## transform luminance
+    Lold <- col@coords[, "L"]
+    col@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (100 - (100 - Lold) * (1 - amount)) +
+        (amount < 0) * Lold * (1 + amount)
+    } else {
+      Lold + amount * 100
+    }
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+    ## transform chroma correspondingly (relative to maximum chroma possible)
+    ## With the availability of the combined model, it seems better to not apply this adjustment here.
+    ## Lighened colors look better without it, and darkened colors look better under the combined model.
+    #col@coords[, "C"] <- col@coords[, "C"]/ceiling(max_chroma(col@coords[, "H"], Lold) + 1e-8) *
+    #  max_chroma(col@coords[, "H"], col@coords[, "L"], floor = TRUE)
+    ## check that resulting chroma is within appropriate bounds
+    col@coords[, "C"] <- pmin(max_chroma(col@coords[, "H"], col@coords[, "L"], floor = TRUE),
+                              pmax(0, col@coords[, "C"]))
+  }
+  else if (space == "HLS") {
+    ## *** darkening/lightening in HLS space ***
+
+    col <- as(col, "HLS")
+    col@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (1 - (1 - col@coords[, "L"]) * (1 - amount)) +
+        (amount < 0) * col@coords[, "L"] * (1 + amount)
+    } else {
+      col@coords[, "L"] + amount
+    }
+    col@coords[, "L"] <- pmin(1, pmax(0, col@coords[, "L"]))
+  } else {
+    ## *** darkening/lightening in combined space ***
+
+    colHLS <- as(col, "HLS")
+    colHLS@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (1 - (1 - colHLS@coords[, "L"]) * (1 - amount)) +
+        (amount < 0) * colHLS@coords[, "L"] * (1 + amount)
+    } else {
+      colHLS@coords[, "L"] + amount
+    }
+    colHLS@coords[, "L"] <- pmin(1, pmax(0, colHLS@coords[, "L"]))
+
+    colHLSHCL <- as(as(colHLS, "RGB"), "polarLUV")
+
+    ## convert to HCL
+    colHCL <- as(col, "polarLUV")
+    ## fix-up extreme luminance cases
+    colHCL@coords[, "L"] <- pmin(100, pmax(0, colHCL@coords[, "L"]))
+
+    ## transform luminance
+    Lold <- colHCL@coords[, "L"]
+    colHCL@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (100 - (100 - Lold) * (1 - amount)) +
+        (amount < 0) * Lold * (1 + amount)
+    } else {
+      Lold + amount * 100
+    }
+
+    #print(colHCL@coords[, "H"])
+    #print(colHLSHCL@coords[, "H"])
+
+    colHCL@coords[, "L"] <- pmin(100, pmax(0, colHCL@coords[, "L"]))
+    #colHCL@coords[, "H"] <- colHLSHCL@coords[, "H"]
+    colHCL@coords[, "C"] <- colHLSHCL@coords[, "C"]
+
+    ## transform chroma correspondingly (relative to maximum chroma possible)
+    colHCL@coords[, "C"] <- pmin(max_chroma(colHCL@coords[, "H"], colHCL@coords[, "L"], floor = TRUE), colHCL@coords[, "C"])
+    col <- colHCL
+  }
+
+  ## convert back to hex and add alpha again (if any)
+  col <- hex(col, fixup = fixup)
+  col[!is.na(col)] <- paste(col[!is.na(col)], alpha[!is.na(col)], sep = "")
+  return(col)
+}
+
+
+if(FALSE) {
+  ## code
+  library("colorspace")
+
+  ## convenience demo functions
+  wheel <- function(col, radius = 1, ...)
+    pie(rep(1, length(col)), col = col, radius = radius, ...)
+
+  pal <- function(col, border = "light gray") {
+    n <- length(col)
+    plot(0, 0, type="n", xlim = c(0, 1), ylim = c(0, 1), axes = FALSE, xlab = "", ylab = "")
+    rect(0:(n-1)/n, 0, 1:n/n, 1, col = col, border = border)
+  }
+
+
+  ## compare original & lightened colors
+  par(mar = rep(0, 4), mfrow = c(6, 3))
+  wheel(rainbow_hcl(12)); mtext("HLS")
+  wheel(rainbow_hcl(12)); mtext("HCL")
+  wheel(rainbow_hcl(12)); mtext("combined")
+  wheel(lightdark2(rainbow_hcl(12), amount = 0.2))
+  wheel(lightdark2(rainbow_hcl(12), amount = 0.2, space = "HCL"))
+  wheel(lightdark2(rainbow_hcl(12), amount = 0.2, space = "combined"))
+  wheel(lightdark2(rainbow_hcl(12), amount = 0.4))
+  wheel(lightdark2(rainbow_hcl(12), amount = 0.4, space = "HCL"))
+  wheel(lightdark2(rainbow_hcl(12), amount = 0.4, space = "combined"))
+  wheel(rainbow(12))
+  wheel(rainbow(12))
+  wheel(rainbow(12))
+  wheel(lightdark2(rainbow(12), amount = 0.2))
+  wheel(lightdark2(rainbow(12), amount = 0.2, space = "HCL"))
+  wheel(lightdark2(rainbow(12), amount = 0.2, space = "combined"))
+  wheel(lightdark2(rainbow(12), amount = 0.4))
+  wheel(lightdark2(rainbow(12), amount = 0.4, space = "HCL"))
+  wheel(lightdark2(rainbow(12), amount = 0.4, space = "combined"))
+
+  ## compare original & darkened colors
+  par(mar = rep(0, 4), mfrow = c(6, 3))
+  wheel(rainbow_hcl(12)); mtext("HLS")
+  wheel(rainbow_hcl(12)); mtext("HCL")
+  wheel(rainbow_hcl(12)); mtext("combined")
+  wheel(lightdark2(rainbow_hcl(12), amount = -0.2))
+  wheel(lightdark2(rainbow_hcl(12), amount = -0.2, space = "HCL"))
+  wheel(lightdark2(rainbow_hcl(12), amount = -0.2, space = "combined"))
+  wheel(lightdark2(rainbow_hcl(12), amount = -0.4))
+  wheel(lightdark2(rainbow_hcl(12), amount = -0.4, space = "HCL"))
+  wheel(lightdark2(rainbow_hcl(12), amount = -0.4, space = "combined"))
+  wheel(rainbow(12))
+  wheel(rainbow(12))
+  wheel(rainbow(12))
+  wheel(lightdark2(rainbow(12), amount = -0.2))
+  wheel(lightdark2(rainbow(12), amount = -0.2, space = "HCL"))
+  wheel(lightdark2(rainbow(12), amount = -0.2, space = "combined"))
+  wheel(lightdark2(rainbow(12), amount = -0.4))
+  wheel(lightdark2(rainbow(12), amount = -0.4, space = "HCL"))
+  wheel(lightdark2(rainbow(12), amount = -0.4, space = "combined"))
+
+
+
+  ## fairly dark/colorful colors --> turn lighter
+  cl <- rainbow_hcl(5)
+
+  ## HLS vs. HCL vs. combined --> HCL works best
+  par(mfrow = c(3, 3), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(cl); mtext("combined")
+  pal(lightdark2(cl, 0.2))
+  pal(lightdark2(cl, 0.2, space = "HCL"))
+  pal(lightdark2(cl, 0.2, space = "combined"))
+  pal(lightdark2(cl, 0.4))
+  pal(lightdark2(cl, 0.4, space = "HCL"))
+  pal(lightdark2(cl, 0.4, space = "combined"))
+
+
+  ## fairly light colors --> turn darker
+  cl <- rainbow_hcl(5, l = 90, c = 35)
+
+  ## HLS vs. HCL vs. combined --> combined works best
+  par(mfrow = c(3, 3), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(cl); mtext("combined")
+  pal(lightdark2(cl, -0.2))
+  pal(lightdark2(cl, -0.2, space = "HCL"))
+  pal(lightdark2(cl, -0.2, space = "combined"))
+  pal(lightdark2(cl, -0.4))
+  pal(lightdark2(cl, -0.4, space = "HCL"))
+  pal(lightdark2(cl, -0.4, space = "combined"))
+
+  ## fairly dark colors --> turn lighter
+  cl <- c("#E53B80", "#938102", "#069361", "#018EA1", "#C740EC")
+
+  ## HLS vs. HCL vs. combined --> HCL works best
+  par(mfrow = c(3, 3), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(cl); mtext("combined")
+  pal(lightdark2(cl, 0.2))
+  pal(lightdark2(cl, 0.2, space = "HCL"))
+  pal(lightdark2(cl, 0.2, space = "combined"))
+  pal(lightdark2(cl, 0.4))
+  pal(lightdark2(cl, 0.4, space = "HCL"))
+  pal(lightdark2(cl, 0.4, space = "combined"))
+
+  ## fairly light colors --> turn darker
+  ## http://stackoverflow.com/questions/30219738/is-there-a-way-to-programmatically-darken-the-color-given-rgb-values
+  cl <- c("#CDE4F3","#E7F3D3","#F7F0C7","#EFCFE5","#D0D1E7")
+
+  ## HLS vs. HCL vs. combined --> HLS works best
+  par(mfrow = c(3, 3), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(cl); mtext("combined")
+  pal(lightdark2(cl, -0.2))
+  pal(lightdark2(cl, -0.2, space = "HCL"))
+  pal(lightdark2(cl, -0.2, space = "combined"))
+  pal(lightdark2(cl, -0.4))
+  pal(lightdark2(cl, -0.4, space = "HCL"))
+  pal(lightdark2(cl, -0.4, space = "combined"))
+
+  ## moderately dark colors --> turn lighter
+  ## HLS vs. HCL vs. combined --> HCL works best
+  cl <- c("#61A9D9", "#ADD668", "#E6D152", "#CE6BAF", "#797CBA")
+  par(mfrow = c(3, 3), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(cl); mtext("combined")
+  pal(lightdark2(cl, 0.2))
+  pal(lightdark2(cl, 0.2, space = "HCL"))
+  pal(lightdark2(cl, 0.2, space = "combined"))
+  pal(lightdark2(cl, 0.4))
+  pal(lightdark2(cl, 0.4, space = "HCL"))
+  pal(lightdark2(cl, 0.4, space = "combined"))
+
+  ## moderately dark colors --> turn lighter, test additive model
+  ## HLS vs. HCL vs. combined --> HCL works best
+  cl <- c("#61A9D9", "#ADD668", "#E6D152", "#CE6BAF", "#797CBA")
+  par(mfrow = c(3, 3), mar = rep(0, 4), oma = c(0, 0, 2, 0))
+  pal(cl); mtext("HLS")
+  pal(cl); mtext("HCL")
+  pal(cl); mtext("combined")
+  pal(lightdark2(cl, 0.1, method = "absolute"))
+  pal(lightdark2(cl, 0.1, method = "absolute", space = "HCL"))
+  pal(lightdark2(cl, 0.1, method = "absolute", space = "combined"))
+  pal(lightdark2(cl, 0.2, method = "absolute"))
+  pal(lightdark2(cl, 0.2, method = "absolute", space = "HCL"))
+  pal(lightdark2(cl, 0.2, method = "absolute", space = "combined"))
+}
+
+#' Adjust or Extract Transparency of Colors
+#'
+#' Adjust (i.e., add, remove, or modify) or extract alpha transparency of a vector of colors.
+#'
+#' Alpha transparency is useful for making colors semi-transparent, e.g., for
+#' overlaying different elements in graphics. An alpha value of 0 (or 00 in hex strings)
+#' corresponds to fully transparent and an alpha value of 1 (or FF in hex strings)
+#' corresponds to fully opaque. If a color hex string in R does not provide an explicit
+#' alpha transparency, the color is assumed to be fully opaque.
+#'
+#' The \code{adjust_transparency} function can be used to adjust the alpha transparency
+#' of a set of colors. It always returns a hex color specification. This hex color
+#' can have the alpha transparency added/removed/modified depending on the
+#' specification of \code{alpha}: \itemize{
+#' \item \code{alpha = NULL}: Returns a hex vector with alpha transparency only if needed.
+#'       Thus, it keeps the alpha transparency for the colors (if any) but only if
+#'       different from opaque.
+#' \item \code{alpha = TRUE}: Returns a hex vector with alpha transparency
+#'       for all colors, using opaque (FF) as the default if missing.
+#' \item \code{alpha = FALSE}: Returns a hex vector without alpha transparency for
+#'       all colors (even if the original colors had non-opaque alpha).
+#' \item \code{alpha} numeric: Returns a hex vector with alpha transparency for
+#'       all colors set to the \code{alpha} argument (recycled if necessary).
+#' }
+#'
+#' The \code{extract_transparency} function can be used to extract the alpha transparency
+#' from a set of colors. It allows to specify the \code{default} value - that should be used
+#' for colors without an explicit alpha transparency (defaulting to fully opaque) - and
+#' \code{mode} of the return value. This can either be numeric (in [0, 1]), integer
+#' (0L, 1L, \dots, 255L), character (\dQuote{00}, \dQuote{01}, \dots, \dQuote{FF}),
+#' or an object of class \code{\link[base]{hexmode}} (internally represented as integer
+#' with printing as character). The \code{default} can use any of these modes as well
+#' (independent of the output \code{mode}) or be \code{NA}.
+#'
+#' @param col vector of R colors. Can be any of the three kinds of R colors,
+#' i.e., either a color name (an element of
+#' \code{\link[grDevices]{colors}}), a hexadecimal (hex) string of the form
+#' \code{"#rrggbb"} or \code{"#rrggbbaa"} (see \code{\link[grDevices]{rgb}}), or
+#' an integer \code{i} meaning \code{palette()[i]}. Additionally, \code{col} can be
+#' a formal \code{\link[colorspace]{color-class}} object or a matrix with three
+#' rows containing R/G/B (0-255) values.
+#' @param alpha either a new alpha transparency value or logical (to add/remove alpha)
+#' or \code{NULL}. See details.
+#' @param mode character specifying the output mode for the alpha transparency, can be
+#' \code{"numeric"}, \code{"integer"}, \code{"character"} or \code{"hexmode"}. See details.
+#' @param default vector of length 1 specifying the default alpha transparency that should
+#' be returned for colors that do not specify any explicitly (defaulting to fully opaque).
+#' Can either be numeric, integer, character, or hexmode.
+#' @return For \code{adjust_transparency} character vector with hexadecimal color strings with alpha transparency
+#' corresponding to \code{alpha} argument. For \code{extract_transparency} a vector of
+#' alpha transparency values with the indicated \code{mode}.
+#' @seealso \code{\link[grDevices]{rgb}}, \code{\link[colorspace]{desaturate}}, \code{\link[colorspace]{lighten}}
+#' @references Zeileis A, Fisher JC, Hornik K, Ihaka R, McWhite CD, Murrell P, Stauffer R, Wilke CO (2020).
+#' \dQuote{colorspace: A Toolbox for Manipulating and Assessing Colors and Palettes.}
+#' \emph{Journal of Statistical Software}, \bold{96}(1), 1--49. \doi{10.18637/jss.v096.i01}
+#' @keywords color
+#' @examples
+#' ## modify transparency of a color (in different formats)
+#' adjust_transparency("black",   alpha = c(0, 0.5, 1)) ## name
+#' adjust_transparency("#000000", alpha = c(0, 0.5, 1)) ## hex string
+#' adjust_transparency(1,         alpha = c(0, 0.5, 1)) ## palette() integer
+#'
+#' ## three shades of gray (in different formats:
+#' ## name/opaque, hex/opaque, hex/semi-transparent)
+#' x <- c("gray", "#BEBEBE", "#BEBEBE80")
+#'
+#' ## adjust transparency
+#' adjust_transparency(x, alpha = NULL)  ## only if necessary
+#' adjust_transparency(x, alpha = TRUE)  ## add
+#' adjust_transparency(x, alpha = FALSE) ## remove
+#' adjust_transparency(x, alpha = 0.8)   ## modify
+#'
+#' ## extract transparency in different formats
+#' extract_transparency(x, mode = "numeric") ## default
+#' extract_transparency(x, mode = "integer")
+#' extract_transparency(x, mode = "character")
+#' extract_transparency(x, mode = "hexmode")
+#'
+#' ## extract transparency with different default values
+#' extract_transparency(x, default = NA)
+#' extract_transparency(x, default = 0.5)
+#' extract_transparency(x, default = 128L)
+#' extract_transparency(x, default = "80", mode = "integer")
+#' @export adjust_transparency
+#' @importFrom grDevices rgb col2rgb
+
+adjust_transparency <- function(col, alpha = TRUE) {
+
+  ## alpha argument controls new alpha values
+  new_alpha <- alpha
+  if(inherits(new_alpha, "hexmode")) new_alpha <- unclass(new_alpha)
+
+  ## support S4 color specifications as well (with default alpha = 1)
+  if(inherits(col, "color")) col <- paste0(hex(col), "FF")
+
+  ## keep indizes of NA colors
+  NAidx <- which(is.na(col))
+  n <- if(is.matrix(col) && is.numeric(col)) NCOL(col) else length(col)
+
+  ## col has to be hex code, otherwise col2rgb is used
+  if(is.character(col) &&
+     (all(substr(col, 1L, 1L) == "#") & all(nchar(col) %in% c(7L, 9L))))
+  {
+    ## extract alpha from hex (if any)
+    alpha <- substr(col, 8L, 9L)
+    ## retain only RGB in hex
+    col <- substr(col, 1L, 7L)
+  } else {
+    if(!(is.matrix(col) && is.numeric(col))) col <- col2rgb(col, alpha = TRUE)
+    ## extract alpha values (if any)
+    alpha <- if(NROW(col) > 3L) convert_transparency(col[4L, ]/255, mode = "character") else rep.int("FF", n)
+    ## retain only RGB
+    col <- rgb(col[1L, ], col[2L, ], col[3L, ], maxColorValue = 255)
+  }
+
+  ## adjust alpha transparency
+  if(is.null(new_alpha)) {
+    alpha[alpha == "FF"] <- ""
+  } else if(identical(new_alpha, FALSE)) {
+    alpha <- rep.int("", n)
+  } else if(identical(new_alpha, TRUE)) {
+    alpha[alpha == ""] <- "FF"
+  } else {
+    alpha <- convert_transparency(new_alpha, mode = "character")
+    if(length(alpha) != n) {
+      n <- max(n, length(alpha))
+      col <- rep_len(col, n)
+      alpha <- rep_len(alpha, n)
+    }
+  }
+
+  ## add alpha again (if any) and manage NAs
+  col <- paste(col, alpha, sep = "")
+  if(length(NAidx) > 0) col[NAidx] <- NA
+
+  return(col)
+}
+
+#' @rdname adjust_transparency
+#' @export extract_transparency
+extract_transparency <- function(col, mode = "numeric", default = 1) {
+
+  ## handle mode of return value
+  mode <- match.arg(mode, c("numeric", "double", "integer", "character", "hexmode"))
+  if(mode == "double") mode <- "numeric"
+
+  ## handle default
+  if(length(default) > 1L) {
+    warning("'default' should be of length 1, first element used")
+    default <- default[1L]
+  } else if(length(default) < 1L) {
+    default <- NA
+  }
+  if(inherits(default, "hexmode")) default <- unclass(default)
+  if(mode == "hexmode") {
+    hexmode <- TRUE
+    mode <- "integer"
+  } else {
+    hexmode <- FALSE
+  }
+  na <- switch(mode,
+               "numeric" = NA_real_,
+               "character" = NA_character_,
+               NA_integer_)
+  if(is.na(default)) {
+    default <- na
+  } else if(is.character(default) | is.numeric(default)) {
+    default <- convert_transparency(default, mode = mode)
+  } else {
+    warning("unknown type of 'default' using NA instead")
+    default <- na
+  }
+
+  ## for S4 color specifications or RGB matrices the default is used
+  if(inherits(col, "color")) col <- coords(col)
+
+  ## number of colors and position of NA colors
+  if(is.matrix(col) && is.numeric(col)) {
+    n <- NCOL(col)
+    ina <- which(apply(is.na(col), 1L, any))
+  } else {
+    n <- length(col)
+    ina <- which(is.na(col))
+  }
+
+  ## cases where alpha can be extracted
+  ialpha <- if(is.character(col)) {
+    which(substr(col, 1L, 1L) == "#" & nchar(col) == 9L)
+  } else {
+    integer(0)
+  }
+
+  ## set up return value
+  alpha <- rep.int(default, n)
+  if(length(ialpha) > 0L) alpha[ialpha] <- convert_transparency(substr(col[ialpha], 8L, 9L), mode = mode)
+  alpha[ina] <- na
+  if(hexmode) alpha <- structure(alpha, class = "hexmode")
+  return(alpha)
+}
+
+## auxiliary function
+convert_transparency <- function(x, mode = "numeric") {
+  mode <- match.arg(mode, c("numeric", "integer", "character"))
+  if(is.character(x)) {
+    if(!all(toupper(x) %in% format(as.hexmode(0L:255L), width = 2L, upper.case = TRUE))) {
+      stop("invalid character specification of alpha transparency, must be in 00, 01, ..., FF")
+    }
+    x <- switch(mode,
+                "integer" = as.integer(as.hexmode(x)),
+                "numeric" = as.integer(as.hexmode(x))/255,
+                x)
+  } else if(is.integer(x)) {
+    if(!all(x %in% 0L:255L)) {
+      stop("invalid integer specification of alpha transparency, must be in 0L, 1L, ..., 255L")
+    }
+    x <- switch(mode,
+                "numeric" = x/255,
+                "character" = format(as.hexmode(x), width = 2L, upper.case = TRUE),
+                x)
+  } else if(is.numeric(x)) {
+    if(!all(x >= 0 & x <= 1)) {
+      stop("invalid numeric specification of alpha transparency, must be in [0, 1]")
+    }
+    x <- switch(mode,
+                "integer" = as.integer(round(x * 255 + 0.0001)),
+                "character" = format(as.hexmode(round(x * 255 + 0.0001)), width = 2L, upper.case = TRUE),
+                x)
+  }
+  return(x)
+}
+
+
+#' Desaturate Colors by Chroma Removal in HCL Space
+#'
+#' Transform a vector of given colors to the corresponding colors with chroma
+#' reduced (by a tunable amount) in HCL space.
+#'
+#' If input \code{col} is a vector given colors are first transformed to RGB
+#' (either using \code{\link[colorspace]{hex2RGB}} or
+#' \code{\link[grDevices]{col2rgb}}) and then to HCL
+#' (\code{\link[colorspace]{polarLUV}}).  In HCL, chroma is reduced
+#' and then the color is transformed back to a hexadecimal
+#' string.
+#'
+#' If input \code{col} is a matrix with three rows named \code{R}, \code{G}, and
+#' \code{B} (top down) they are interpreted as Red-Green-Blue values within the
+#' range \code{[0-255]}. The desaturation takes place in the HCL space as well.
+#' Instead of an (s)RGB color vector a matrix of the same size as the input
+#' \code{col} with desaturated Red-Green-Blue values will be returned.
+#' This can be handy to avoid too many conversions.
+#'
+#' @param col vector of R colors. Can be any of the three kinds of R colors, i.e.,
+#' either a color name (an element of \code{\link[grDevices]{colors}}), a hexadecimal string
+#' of the form \code{"#rrggbb"} or \code{"#rrggbbaa"} (see
+#' \code{\link[grDevices]{rgb}}), or an integer \code{i} meaning
+#' \code{palette()[i]}. Input \code{col} can also be a matrix with three
+#' rows containing R/G/B (0-255) values, see details.
+#' @param amount numeric specifying the amount of desaturation where \code{1}
+#' corresponds to complete desaturation, \code{0} to no desaturation, and
+#' values in between to partial desaturation.
+#' @param ... additional arguments. If \code{severity} is specified it will
+#' overrule the input argument \code{amount} (for convenience).
+#' @return A character vector with (s)RGB codings of the colors in the palette
+#' if input \code{col} is a vector. If input \code{col} is a matrix with R/G/B
+#' values a matrix of the same form and size will be returned.
+#' @seealso \code{\link[colorspace]{polarLUV}}, \code{\link[colorspace]{hex}}, \code{\link[colorspace]{lighten}}
+#' @references Zeileis A, Fisher JC, Hornik K, Ihaka R, McWhite CD, Murrell P, Stauffer R, Wilke CO (2020).
+#' \dQuote{colorspace: A Toolbox for Manipulating and Assessing Colors and Palettes.}
+#' \emph{Journal of Statistical Software}, \bold{96}(1), 1--49. \doi{10.18637/jss.v096.i01}
+#' @keywords color
+#' @examples
+#' ## rainbow of colors and their desaturated counterparts
+#' rainbow_hcl(12)
+#' desaturate(rainbow_hcl(12))
+#'
+#' ## convenience demo function
+#' wheel <- function(col, radius = 1, ...)
+#'   pie(rep(1, length(col)), col = col, radius = radius, ...)
+#'
+#' ## compare base and colorspace palettes
+#' ## (in color and desaturated)
+#' par(mar = rep(0, 4), mfrow = c(2, 2))
+#' ## rainbow color wheel
+#' wheel(rainbow_hcl(12))
+#' wheel(rainbow(12))
+#' wheel(desaturate(rainbow_hcl(12)))
+#' wheel(desaturate(rainbow(12)))
+#'
+#' ## apply desaturation directly on RGB values
+#' RGB <- t(hex2RGB(rainbow(3))@coords * 255)
+#' desaturate(RGB)
+#' @export desaturate
+#' @importFrom grDevices col2rgb
+
+desaturate <- function(col, amount = 1, ...) {
+
+  ## If "severity" is given in the dots argument: use it
+  ## as "amount" (convenience)
+  args = as.list(match.call(expand.dots = TRUE))
+  if ( ! is.null(args$severity) ) amount <- args$severity
+
+  ## keep indizes of NA colors
+  NAidx <- which(is.na(col))
+
+  ## col has to be hex code, otherwise col2rgb is used
+  matrix_input <- is.matrix(col)
+  if(is.character(col) &&
+     (all(substr(col, 1L, 1L) == "#") & all(nchar(col) %in% c(7L, 9L))))
+  {
+    ## extract alpha from hex (if any)
+    alpha <- substr(col, 8L, 9L)
+    ## retain only RGB in hex
+    col <- substr(col, 1L, 7L)
+    ## convert to colorspace::sRGB
+    col <- hex2RGB(col)
+    # Colors are a wide matrix with three columns containing
+    # R, G, B (0-255). Rownames have to be set!
+  } else if ( matrix_input ) {
+    stopifnot( all(toupper(rownames(col)) == c("R","G","B")) )
+    col <- sRGB(t(col[1L:3L, ])/255)
+  } else {
+    col <- col2rgb(col, alpha = TRUE)
+    ## extract alpha values (if non-FF)
+    alpha <- format(as.hexmode(col[4L, ]), width = 2L, upper.case = TRUE)
+    alpha[alpha == "FF"] <- ""
+    ## retain only RGB
+    col <- sRGB(t(col[1L:3L, ])/255)
+  }
+
+  ## convert to HCL and fix-up extreme luminance cases
+  col <- as(col, "polarLUV")
+  col@coords[, 2L] <- (1 - amount) * col@coords[, 2L]
+
+  ## fix-up extreme luminance cases
+  col@coords[col@coords[, 1L] <= 0 | col@coords[, 1L] >= 100, 2L:3L] <- 0
+
+  ## Return matrix if input 'col' was of type matrix
+  if ( matrix_input ) return( t( as(col,"sRGB")@coords * 255) )
+
+  ## convert back to hex and add alpha again (if any)
+  col <- hex(col)
+  col <- paste(col, alpha, sep = "")
+  if(length(NAidx) > 0) col[NAidx] <- NA
+  return(col)
+}
+
+#' Simulate Color Vision Deficiency
+#'
+#' Transformation of R colors by simulating color vision deficiencies,
+#' based on a CVD transform matrix.
+#'
+#' Using the physiologically-based model for simulating color vision deficiency (CVD)
+#' of Machado et al. (2009), different kinds of limitations can be
+#' emulated: deuteranope (green cone cells defective), protanope (red cone cells defective),
+#' and tritanope (blue cone cells defective).
+#' The workhorse function to do so is \code{simulate_cvd} which can take any vector
+#' of valid R colors and transform them according to a certain CVD transformation
+#' matrix (see \code{\link{cvd}}) and transformation equation.
+#'
+#' The functions \code{deutan}, \code{protan}, and \code{tritan} are the high-level functions for
+#' simulating the corresponding kind of colorblindness with a given severity.
+#' Internally, they all call \code{simulate_cvd} along with a (possibly interpolated)
+#' version of the matrices from \code{\link{cvd}}. Matrix interpolation can be carried out with
+#' the function \code{interpolate_cvd_transform} (see Examples).
+#'
+#' If input \code{col} is a matrix with three rows named \code{R}, \code{G}, and
+#' \code{B} (top down) they are interpreted as Red-Green-Blue values within the
+#' range \code{[0-255]}. Instead of an (s)RGB color vector a matrix of the same size as the
+#' input \code{col} with the corresponding simulated Red-Green-Blue values will be returned.
+#' This can be handy to avoid too many conversions.
+#'
+#' @param col character. A color or vector of colors, e.g., \code{"#FFA801"} or \code{"blue"}.
+#' Input \code{col} can also be a matrix with three rows containing R/G/B (0-255) values, see details.
+#' @param severity numeric. Severity of the color vision defect, a number between 0 and 1.
+#' @param cvd_transform numeric 3x3 matrix, specifying the color vision deficiency transform matrix.
+#' @param cvd list of cvd transformation matrices. See \code{\link{cvd}} for available options.
+#'
+#' @references Machado GM, Oliveira MM, Fernandes LAF (2009).
+#'   A Physiologically-Based Model for Simulation of Color Vision Deficiency.
+#'   \emph{IEEE Transactions on Visualization and Computer Graphics}. \bold{15}(6), 1291--1298.
+#'   \doi{10.1109/TVCG.2009.113}
+#'   Online version with supplements at
+#'   \url{http://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/CVD_Simulation.html}.
+#'
+#' Zeileis A, Fisher JC, Hornik K, Ihaka R, McWhite CD, Murrell P, Stauffer R, Wilke CO (2020).
+#' \dQuote{colorspace: A Toolbox for Manipulating and Assessing Colors and Palettes.}
+#' \emph{Journal of Statistical Software}, \bold{96}(1), 1--49. \doi{10.18637/jss.v096.i01}
+#' @keywords colors cvd colorblind
+#' @seealso \code{\link{cvd}}
+#' @export
+#' @examples
+#' # simulate color-vision deficiency by calling `simulate_cvd` with specified matrix
+#' simulate_cvd(c("#005000", "blue", "#00BB00"), tritanomaly_cvd["6"][[1]])
+#'
+#' # simulate color-vision deficiency by calling the shortcut high-level function
+#' tritan(c("#005000", "blue", "#00BB00"), severity = 0.6)
+#'
+#' # simulate color-vision deficiency by calling `simulate_cvd` with interpolated cvd matrix
+#' simulate_cvd(c("#005000", "blue", "#00BB00"),
+#'              interpolate_cvd_transform(tritanomaly_cvd, severity = 0.6))
+#'
+#' # apply CVD directly on RGB matrix
+#' RGB <- t(hex2RGB(rainbow(3))@coords*255)
+#' deutan(RGB)
+#'
+#' @importFrom grDevices col2rgb
+simulate_cvd <- function(col, cvd_transform) {
+  matrix_input <- is.matrix(col)
+  NAidx <- NULL
+  # Adapted from desaturate
+  # If all hex
+  if (is.character(col) && (all(substr(col, 1L, 1L) == "#") &
+                            all(nchar(col) %in% c(7L, 9L)))) {
+    # Save transparency value for later
+    alpha <- substr(col, 8L, 9L)
+    # keep indizes of NA colors
+    NAidx <- which(is.na(col))
+    col <- substr(col, 1L, 7L)
+    col <- grDevices::col2rgb(col)
+    # Colors are a wide matrix with three columns containing
+    # R, G, B (0-255). Rownames have to be set!
+  } else if ( matrix_input ) {
+    stopifnot(all(toupper(rownames(col)) == c("R","G","B")))
+    # If contains built in color..,
+  } else {
+    # keep indizes of NA colors
+    NAidx <- which(is.na(col))
+    col <- grDevices::col2rgb(col, alpha = TRUE)
+    ## extract alpha values (if non-FF)
+    alpha <- format(as.hexmode(col[4L, ]), width = 2L, upper.case = TRUE)
+    alpha[alpha == "FF"] <- ""
+    ## retain only RGB
+    col <- col[1L:3L,]
+  }
+
+  # Transform color
+  RGB <- cvd_transform %*% col
+  rownames(RGB) <- c("R","G","B")
+
+  # Bound RGB values
+  RGB[RGB<0]   <- 0
+  RGB[RGB>255] <- 255
+
+  # If input 'col' was RGB matrix: return RGB matrix with simulated colors
+  if ( matrix_input ) return(round(RGB))
+
+  # Convert back to hex
+  rgb2hex <- function(RGB) grDevices::rgb(RGB[1,], RGB[2,], RGB[3,], maxColorValue = 255)
+
+  final_hex <- paste(rgb2hex(RGB), alpha, sep = "")
+  if(length(NAidx) > 0) final_hex[NAidx] <- NA
+  return(final_hex)
+}
+
+#' @rdname simulate_cvd
+#' @export
+deutan <- function(col, severity = 1) {
+  simulate_cvd(col, cvd_transform = interpolate_cvd_transform(deutanomaly_cvd, severity))
+}
+
+#' @rdname simulate_cvd
+#' @export
+protan <- function(col, severity = 1) {
+  simulate_cvd(col, cvd_transform = interpolate_cvd_transform(protanomaly_cvd, severity))
+}
+
+#' @rdname simulate_cvd
+#' @export
+tritan <- function(col, severity = 1){
+  simulate_cvd(col, cvd_transform = interpolate_cvd_transform(tritanomaly_cvd, severity))
+}
+
+#' @rdname simulate_cvd
+#' @export
+interpolate_cvd_transform <- function(cvd, severity = 1) {
+  if (severity <= 0) {
+    cvd[[1]]
+  } else if (severity >= 1) {
+    cvd[[11]]
+  } else {
+    s <- 10*severity
+    i1 <- floor(s)
+    i2 <- ceiling(s)
+    if (i1 == i2) {
+      cvd[[i1+1]]
+    }
+    else {
+      (i2-s)*cvd[[i1+1]] + (s-i1)*cvd[[i2+1]]
+    }
+  }
+}
+
+#' Algorithmically Lighten or Darken Colors
+#'
+#' The functions \code{lighten} and \code{darken} take a vector of R colors and adjust the colors such that
+#' they appear lightened or darkened, respectively.
+#'
+#' The color adjustment can be calculated in three different color spaces. \enumerate{
+#'   \item If \code{space = "HCL"}, the colors are transformed to HCL, (\code{\link[colorspace]{polarLUV}}),
+#'         the luminance component L is adjusted, and then the colors are transformed back to a hexadecimal
+#'         RGB string.
+#'   \item If \code{space = "HLS"}, the colors are transformed to HLS, the lightness component L is adjusted,
+#'         and then the color is transformed back to a hexadecimal RGB string.
+#'   \item If \code{space = "combined"}, the colors are first adjusted in both the HCL and HLS spaces. Then,
+#'         the adjusted HLS colors are converted into HCL, and then the chroma components of the adjusted HLS
+#'         colors are copied to the adjusted HCL colors. Thus, in effect, the combined model adjusts luminance
+#'         in HCL space but chroma in HLS space.
+#' }
+#' We have found that typically \code{space = "HCL"} performs best for lightening colors and \code{space = "combined"}
+#' performs best for darkening colors, and these are the default settings for \code{lighten} and \code{darken},
+#' respectively.
+#'
+#' Regardless of the chosen color space, the adjustment of the L component can occur by two methods, relative
+#' (the default) and absolute. Under the absolute method, the adjustment is \code{L +/- 100 * amount} when
+#' lightening/darkening colors. Under the relative method, the adjustment is \code{100 - (100 - L) * (1 - amount)} when
+#' lightening colors and \code{L * (1 - amount)} when darkening colors.
+#'
+#' Programmatically lightening and darkening colors can yield unexpected results (see examples). In HCL space,
+#' colors can become either too gray or overly colorful. By contrast, in HLS space it can happen that the
+#' overall amount of lightening or darkening appears to be non-uniform among a group of colors that are
+#' lightened or darkened jointly, and again, colors can become either too gray or overly colorful. We
+#' recommend to try different color spaces if the default space for the chosen function (\code{lighten}
+#' or \code{darken}) does not look right in a specific application.
+#'
+#' @param col vector of any of the three kind of R colors, i.e., either a color
+#' name (an element of \code{\link[grDevices]{colors}}), a hexadecimal string
+#' of the form \code{"#rrggbb"} or \code{"#rrggbbaa"} (see
+#' \code{\link[grDevices]{rgb}}), or an integer \code{i} meaning
+#' \code{palette()[i]}.
+#' @param amount numeric specifying the amount of lightening. This is applied either
+#' multiplicatively or additively to the luminance value, depending on the
+#' setting of \code{method} (either relative or absolute). Negative numbers
+#' cause darkening.
+#' @param method character string specifying the adjustment method. Can be either \code{"relative"} or \code{"absolute"}.
+#' @param space character string specifying the color space in which adjustment happens. Can be either \code{"HLS"} or \code{"HCL"}.
+#' @param fixup logical If set to \code{TRUE}, colors that fall outside of the RGB color gamut are slightly modified
+#'   by translating individual primary values so they lie between 0 and 255. If set to \code{FALSE}, out-of-gamut colors
+#'   are replaced by \code{NA}.
+#' @return A character vector with (s)RGB codings of the colors in the palette.
+#' @seealso \code{\link[colorspace]{polarLUV}}, \code{\link[colorspace]{hex}}, \code{\link[colorspace]{desaturate}}
+#' @references Zeileis A, Fisher JC, Hornik K, Ihaka R, McWhite CD, Murrell P, Stauffer R, Wilke CO (2020).
+#' \dQuote{colorspace: A Toolbox for Manipulating and Assessing Colors and Palettes.}
+#' \emph{Journal of Statistical Software}, \bold{96}(1), 1--49. \doi{10.18637/jss.v096.i01}
+#' @keywords color
+#' @examples
+#' # lighten dark colors, example 1
+#' cl <- qualitative_hcl(5)
+#' swatchplot(list(
+#'   HCL = rbind("0%" = cl,
+#'               "15%" = lighten(cl, 0.15),
+#'               "30%" = lighten(cl, 0.3)),
+#'   HLS = rbind("0%" = cl,
+#'               "15%" = lighten(cl, 0.15, space = "HLS"),
+#'               "30%" = lighten(cl, 0.3, space = "HLS")),
+#'   combined = rbind("0%" = cl,
+#'               "15%" = lighten(cl, 0.15, space = "combined"),
+#'               "30%" = lighten(cl, 0.3, space = "combined"))),
+#'   nrow = 4, line = 2.5
+#' )
+#'
+#' # lighten dark colors, example 2
+#' cl <- c("#61A9D9", "#ADD668", "#E6D152", "#CE6BAF", "#797CBA")
+#' swatchplot(list(
+#'   HCL = rbind("0%" = cl,
+#'               "15%" = lighten(cl, 0.15),
+#'               "30%" = lighten(cl, 0.3)),
+#'   HLS = rbind("0%" = cl,
+#'               "15%" = lighten(cl, 0.15, space = "HLS"),
+#'               "30%" = lighten(cl, 0.3, space = "HLS")),
+#'   combined = rbind("0%" = cl,
+#'               "15%" = lighten(cl, 0.15, space = "combined"),
+#'               "30%" = lighten(cl, 0.3, space = "combined"))),
+#'   nrow = 4, line = 2.5
+#' )
+#'
+#' # darken light colors, example 1
+#' cl <- qualitative_hcl(5, "Pastel 1")
+#' swatchplot(list(
+#'   combined = rbind("0%" = cl,
+#'               "15%" = darken(cl, 0.15),
+#'               "30%" = darken(cl, 0.3)),
+#'   HCL = rbind("0%" = cl,
+#'               "15%" = darken(cl, 0.15, space = "HCL"),
+#'               "30%" = darken(cl, 0.3, space = "HCL")),
+#'   HLS = rbind("0%" = cl,
+#'               "15%" = darken(cl, 0.15, space = "HLS"),
+#'               "30%" = darken(cl, 0.3, space = "HLS"))),
+#'   nrow = 4, line = 2.5
+#' )
+#'
+#' # darken light colors, example 2
+#' cl <- c("#CDE4F3","#E7F3D3","#F7F0C7","#EFCFE5","#D0D1E7")
+#' swatchplot(list(
+#'   combined = rbind("0%" = cl,
+#'               "15%" = darken(cl, 0.15),
+#'               "30%" = darken(cl, 0.3)),
+#'   HCL = rbind("0%" = cl,
+#'               "15%" = darken(cl, 0.15, space = "HCL"),
+#'               "30%" = darken(cl, 0.3, space = "HCL")),
+#'   HLS = rbind("0%" = cl,
+#'               "15%" = darken(cl, 0.15, space = "HLS"),
+#'               "30%" = darken(cl, 0.3, space = "HLS"))),
+#'   nrow = 4, line = 2.5
+#' )
+#' @export lighten
+#' @importFrom grDevices rgb
+#' @importFrom grDevices col2rgb
+lighten <- function(col, amount = 0.1,
+                    method = c("relative", "absolute"), space = c("HCL", "HLS", "combined"), fixup = TRUE)
+{
+  ## method
+  space <- match.arg(space, c("HCL", "HLS", "combined"))
+  method <- match.arg(method, c("relative", "absolute"))
+
+  ## number of colors
+  n <- max(c(length(col), length(amount)))
+  col <- rep_len(col, length.out = n)
+  amount <- rep_len(amount, length.out = n)
+
+  ## save original colors for later, to substitute any cases with amount == 0
+  col_orig <- col
+
+  ## col has to be hex code, otherwise col2rgb is used
+  if(is.character(col) &&
+     (all(substr(col, 1L, 1L) == "#") & all(nchar(col) %in% c(7L, 9L))))
+  {
+    ## extract alpha from hex (if any)
+    alpha <- substr(col, 8L, 9L)
+    ## retain only RGB in hex
+    col <- substr(col, 1L, 7L)
+    ## convert to colorspace::RGB
+    col <- hex2RGB(col)
+  } else {
+    col <- col2rgb(col, alpha = TRUE)
+    # save original colors in hex format, in case some were specified as
+    # named colors or as palette entries
+    col_orig <- rgb(t(col), maxColorValue = 255)
+    ## extract alpha values (if non-FF)
+    alpha <- format(as.hexmode(col[4L, ]), width = 2L, upper.case = TRUE)
+    alpha[alpha == "FF"] <- ""
+    ## retain only RGB
+    col <- RGB(t(col[1L:3L, ])/255)
+  }
+
+  if (space == "HCL") {
+    ## *** darkening/lightening in HCL space ***
+
+    ## convert to HCL
+    col <- as(col, "polarLUV")
+    ## fix-up extreme luminance cases
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+    ## adjust luminance
+    Lold <- col@coords[, "L"]
+    col@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (100 - (100 - Lold) * (1 - amount)) +
+        (amount < 0) * Lold * (1 + amount)
+    } else {
+      Lold + amount * 100
+    }
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+    ## transform chroma correspondingly (relative to maximum chroma possible)
+    ## It seems better to not apply this adjustment here. Lighened colors look better without it,
+    ## and darkened colors look better under the combined model.
+    #col@coords[, "C"] <- col@coords[, "C"]/ceiling(max_chroma(col@coords[, "H"], Lold) + 1e-8) *
+    #  max_chroma(col@coords[, "H"], col@coords[, "L"], floor = TRUE)
+
+    ## check that resulting chroma is within appropriate bounds
+    col@coords[, "C"] <- pmin(max_chroma(col@coords[, "H"], col@coords[, "L"], floor = TRUE),
+                              pmax(0, col@coords[, "C"]))
+  }
+  else if (space == "HLS") {
+    ## *** darkening/lightening in HLS space ***
+
+    col <- as(col, "HLS")
+    col@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (1 - (1 - col@coords[, "L"]) * (1 - amount)) +
+        (amount < 0) * col@coords[, "L"] * (1 + amount)
+    } else {
+      col@coords[, "L"] + amount
+    }
+    col@coords[, "L"] <- pmin(1, pmax(0, col@coords[, "L"]))
+  } else {
+    ## *** darkening/lightening in combined space ***
+
+    ## first do adjustment in HLS space
+    colHLS <- as(col, "HLS")
+    colHLS@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (1 - (1 - colHLS@coords[, "L"]) * (1 - amount)) +
+        (amount < 0) * colHLS@coords[, "L"] * (1 + amount)
+    } else {
+      colHLS@coords[, "L"] + amount
+    }
+    colHLS@coords[, "L"] <- pmin(1, pmax(0, colHLS@coords[, "L"]))
+
+    colHLSHCL <- as(as(colHLS, "RGB"), "polarLUV")
+
+    ## now do adjustment in HCL space
+    col <- as(col, "polarLUV")
+    ## fix-up extreme luminance cases
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+
+    ## transform luminance
+    Lold <- col@coords[, "L"]
+    col@coords[, "L"] <- if(method == "relative") {
+      (amount >= 0) * (100 - (100 - Lold) * (1 - amount)) +
+        (amount < 0) * Lold * (1 + amount)
+    } else {
+      Lold + amount * 100
+    }
+
+    ## fix-up L and copy C over from HLS-converted color
+    col@coords[, "L"] <- pmin(100, pmax(0, col@coords[, "L"]))
+    #col@coords[, "H"] <- colHLSHCL@coords[, "H"]
+    col@coords[, "C"] <- colHLSHCL@coords[, "C"]
+
+    ## make sure chroma is in allowed range
+    col@coords[, "C"] <- pmin(max_chroma(col@coords[, "H"], col@coords[, "L"], floor = TRUE), col@coords[, "C"])
+  }
+
+  ## convert back to hex and add alpha again (if any)
+  col <- hex(col, fixup = fixup)
+  col[!is.na(col)] <- paste(col[!is.na(col)], alpha[!is.na(col)], sep = "")
+
+  ## return original colors whenever amount == 0
+  col[amount == 0] <- col_orig[amount == 0]
+
+  return(col)
+}
+
+
+#' @rdname lighten
+#' @param ... Other parameters handed to the function \code{lighten()}.
+#' @export
+darken <- function(col, amount = 0.1, space = "combined", ...)
+{
+  lighten(col, amount = -1*amount, space = space, ...)
+}
+
+
+#' Compute Maximum Chroma for Given Hue and Luminance in HCL
+#'
+#' Compute approximately the maximum chroma possible for a given hue and
+#' luminance combination in the HCL color space.
+#'
+#' As the possible combinations of chroma and luminance depend on hue, it is
+#' not obvious which maximum chroma can be used for a given combination of hue
+#' and luminance prior to calling \code{\link{polarLUV}}. To avoid having to
+#' \code{fixup} the color upon conversion to RGB \code{\link{hex}} codes, the
+#' \code{max_chroma} function computes (approximately) the maximum chroma
+#' possible. The computations are based on interpolations of pre-computed
+#' maxima in \code{max_chroma_table}, containing the maximum chroma for a given
+#' hue-luminance combination (both in integers). Hence, the result may sometimes
+#' still be very slightly larger than the actual maximum which can be avoided
+#' by taking the \code{floor} of the approximate value.
+#'
+#' @param h hue value in the HCL color description, has to be in [0, 360].
+#' @param l luminance value in the HCL color description, has to be in [0, 100].
+#' @param floor logical. Should the chroma value be rounded down to the next
+#' lower integer?
+#' @return A numeric vector with the maximum chroma coordinates.
+#' @seealso \code{\link[colorspace]{polarLUV}}, \code{\link[colorspace]{hex}}
+#' @keywords color
+#' @examples
+#' max_chroma(h = 0:36 * 10, l = 50)
+#' max_chroma(h = 120, l = 0:10 * 10)
+#' @export
+max_chroma <- function(h, l, floor = FALSE) {
+  ## align h and l
+  n <- max(c(length(h), length(l)))
+  h <- rep_len(h, n)
+  l <- rep_len(l, n)
+
+  ## assure h in [0, 360]
+  while(any(h < 0)) h[h < 0] <- h[h < 0] + 360
+  while(any(h >= 360)) h[h >= 360] <- h[h >= 360] - 360
+
+  ## assure l in [0, 100]
+  l <- pmin(100, pmax(0, l))
+
+  ## obtain surrounding h/l coordinates
+  hmin <- floor(h + 1e-8)
+  hmax <- ceiling(h + 1e-8)
+  lmin <- floor(l + 1e-8)
+  lmax <- ceiling(l + 1e-8)
+
+  ## average
+  c <- (hmax - h) * (lmax - l) * colorspace::max_chroma_table[paste(hmin, lmin, sep = "-")] +
+    (hmax - h) * (l - lmin) * colorspace::max_chroma_table[paste(hmin, lmax, sep = "-")] +
+    (h - hmin) * (lmax - l) * colorspace::max_chroma_table[paste(hmax, lmin, sep = "-")] +
+    (h - hmin) * (l - lmin) * colorspace::max_chroma_table[paste(hmax, lmax, sep = "-")]
+
+  ## catch border cases
+  c <- as.numeric(c) # pmin(c, 100)
+  c[l <= 0 | l >= 100] <- 0
+
+  ## take floor to be "on the safe side"
+  if(floor) c <- floor(c)
+
+  return(c)
+}
+
+#' @rdname max_chroma
+#' @format NULL
+"max_chroma_table"
+
+
+
+
+
+#' Names of colorblind-friendly palettes
+#'
+#' Use \code{\link{met.brewer}} to construct palettes.
+#'
+#' @export
+colorblind_palettes <- c("Cassatt1", "Cassatt2", "Derain", "Egypt", "Greek", "Hiroshige", "Hokusai2", "Hokusai3",
+                         "Ingres", "Isfahan1", "Isfahan2", "Morgenstern", "OKeeffe1", "OKeeffe2", "Pillement", "Troy",
+                         "VanGogh3", "Veronese")
+
+
+# Names whether a palette is colorblind-friendly
+
+#' Colorblind-Friendly Palette Check
+#'
+#' Checks whether a palette is colorblind-friendly.
+#'
+#' @param palette_name Name of Palette. Choices are:
+#' \code{Austria}, \code{Cassatt1}, \code{Cassatt2}, \code{Cross}, \code{Degas}, \code{Derain}, \code{Egypt},
+#' \code{Gauguin}, \code{Greek}, \code{Hiroshige}, \code{Hokusai1}, \code{Hokusai2}, \code{Hokusai3}, \code{Homer1},
+#' \code{Homer2}, \code{Ingres}, \code{Isfahan1}, \code{Isfahan2}, \code{Juarez}, \code{Klimt}, \code{Lakota},
+#' \code{Manet}, \code{Monet}, \code{Moreau}, \code{Morgenstern}, \code{Nattier}, \code{Navajo}, \code{NewKingdom},
+#' \code{Nizami}, \code{OKeeffe1}, \code{OKeeffe2}, \code{Peru1}, \code{Peru2}, \code{Pillement}, \code{Pissaro},
+#' \code{Redon}, \code{Renoir}, \code{Robert}, \code{Signac}, \code{Stevens}, \code{Tara}, \code{Thomas}, \code{Tiepolo},
+#' \code{Troy}, \code{Tsimshian}, \code{VanGogh1}, \code{VanGogh2}, \code{VanGogh3}, \code{Veronese}, and \code{Wissing}
+#' @examples
+#' colorblind.friendly("Veronese")
+#' @return TRUE/FALSE value whether palette is colorblind-friendly
+#' @export
+colorblind.friendly <- function(palette_name){
+
+  `%notin%` <- Negate(`%in%`)
+
+  if (palette_name %notin% names(MetPalettes)) {
+    stop("Palette does not exist.")
+  }
+
+  friendly <- palette_name %in% colorblind_palettes
+
+  return(friendly)
+}
+
+#' Convert from RGB to YCbCr color space
+#'
+#' @description
+#' This function transforms a RGB \code{Raster*} object to YCbCr color space.
+#'
+#' @param x A \code{RasterStack} or \code{RasterBrick} object. 3
+#' bands are mandatory (usually red, green and blue).
+#' @param r Integer, defaults to '1'. Index of the red channel.
+#' @param g Integer, defaults to '2'. Index of the green channel.
+#' @param b Integer, defaults to '3'. Index of the blue channel.
+#'
+#' @return
+#' A true-color \code{RasterStack} object converted to YCbCr color space.
+#'
+#' @author
+#' Florian Detsch, Tim Appelhans
+#'
+#' @references
+#' Deb, K. and Suny, A.H. (2014): Shadow Detection and Removal Based on YCbCr Color Space. Smart Computing Review 4, 23-33, doi:10.6029/smartcr.2014.01.003.
+#'
+#' @examples
+#' b_rgb <- brick(system.file("external/rlogo.grd", package="raster"))
+#' plotRGB(b_rgb)
+#'
+#' b_ycbcr <- rgb2YCbCr(b_rgb)
+#' plot(b_ycbcr,
+#'      main = c("luminance", "blue-yellow chrominance", "green-red chrominance"))
+#'
+#' @export rgb2YCbCr
+#' @aliases rgb2YCbCr
+rgb2YCbCr <- function(x, r = 1, g = 2, b = 3) {
+
+  ### prerequisites
+
+  ## compatibility check
+  if (nlayers(x) < 3)
+    stop("Argument 'x' needs to be a Raster* object with at least 3 layers (usually red, green and blue).")
+
+
+  ### processing
+
+  ## red, green and blue bands
+  r <- x[[r]]
+  g <- x[[g]]
+  b <- x[[b]]
+
+  ## luminance
+  y <- 16 + (65.481 * r + 128.553 * g + 24.966 * b)
+
+  ## blue-yellow chrominance
+  cb <- 128 + (-37.797 * r - 74.203 * g + 112 * b)
+
+  ## green-red chrominance
+  cr <- 128 + (112 * r - 93.786 * g - 18.214 * b)
+
+  ## return ycbcr raster stack
+  stack(y, cb, cr)
+}

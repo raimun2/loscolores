@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1636978353780.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2278394824",
+    "id" : "B6FDC53",
+    "lastKnownWriteTime" : 1636979062,
+    "last_content_update" : 1636979062907,
+    "path" : "C:/Users/Raimundo/Dropbox/Github/loscolores/R/loscolores.R",
+    "project_path" : "R/loscolores.R",
+    "properties" : {
+        "cursorPosition" : "33,0",
+        "scrollLine" : "13"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

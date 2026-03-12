@@ -1,0 +1,72 @@
+---
+title: "Los colores"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+print.palette <- function(x, ...) {
+  n <- length(x)
+  old <- par(mar = c(0.5, 0.5, 0.5, 0.5))
+  on.exit(par(old))
+
+  image(1:n, 1, as.matrix(1:n), col = x,
+        ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+
+  rect(0, 0.9, n + 1, 1.1, col = rgb(1, 1, 1, 0.8), border = NA)
+  text((n + 1) / 2, 1, labels = attr(x, "index"), cex = 1, family = "serif")
+}
+
+pacman::p_load(loscolores)
+
+```
+
+## Paletas de colores
+
+
+```{r cars, echo=FALSE}
+
+
+print(loscolores(1,type="d"))
+print(loscolores(2,type="d"))
+print(loscolores(3,type="d"))
+print(loscolores(4,type="d"))
+print(loscolores(5,type="d"))
+print(loscolores(6,type="d"))
+print(loscolores(7,type="d"))
+print(loscolores(8,type="d"))
+print(loscolores(9,type="d"))
+print(loscolores(10,type="d"))
+print(loscolores(11,type="d"))
+print(loscolores(12,type="d"))
+print(loscolores(13,type="d"))
+print(loscolores(14,type="d"))
+print(loscolores(15,type="d"))
+print(loscolores(16,type="d"))
+print(loscolores(17,type="d"))
+print(loscolores(18,type="d"))
+print(loscolores(19,type="d"))
+print(loscolores(20,type="d"))
+print(loscolores(21,type="d"))
+print(loscolores(22,type="d"))
+print(loscolores(23,type="d"))
+print(loscolores(24,type="d"))
+print(loscolores(25,type="d"))
+print(loscolores(26,type="d"))
+print(loscolores(27,type="d"))
+print(loscolores(28,type="d"))
+print(loscolores(29,type="d"))
+print(loscolores(30,type="d"))
+print(loscolores(31,type="d"))
+print(loscolores(32,type="d"))
+print(loscolores(33,type="d"))
+print(loscolores(34,type="d"))
+print(loscolores(35,type="d"))
+print(loscolores(36,type="d"))
+print(loscolores(37,type="d"))
+print(loscolores(38,type="d"))
+print(loscolores(39,type="d"))
+
+```
+

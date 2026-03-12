@@ -1,2 +1,0 @@
-# loscolores
- palette generation

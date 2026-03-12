@@ -1,0 +1,1435 @@
+#palette display
+
+
+
+# scale_color_d
+# scael_color(fill)_c
+# geom_raster
+
+
+
+
+#' @export
+#' @importFrom graphics rect par image text
+#' @importFrom grDevices rgb
+print.palette <- function(x, ...) {
+  n <- length(x)
+  old <- par(mar = c(0.5, 0.5, 0.5, 0.5))
+  on.exit(par(old))
+
+  image(1:n, 1, as.matrix(1:n), col = x,
+        ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+
+  rect(0, 0.9, n + 1, 1.1, col = rgb(1, 1, 1, 0.8), border = NA)
+  text((n + 1) / 2, 1, labels = attr(x, "index"), cex = 1, family = "serif")
+}
+
+
+
+display.brewer.all <-
+  function (n=NULL, type="all", select=NULL, exact.n=TRUE, colorblindFriendly=FALSE) {
+    gaplist <- ""
+
+    totallist <- c(divlist, gaplist, quallist, gaplist, seqlist)
+    names(totallist) <- c(names(divlist),"gap1",names(quallist),"gap2",names(seqlist))
+    gapnum <- max(c(divnum,qualnum,seqnum))
+    totnum <- c(divnum, gapnum, qualnum, gapnum, seqnum)
+    names(totnum) <- names(totallist)
+
+    if (!(type %in% c("div","qual","seq","all"))) {
+      stop(paste(type, "is not a valid name for a color list\n"))
+    }
+    colorlist <- switch(type, div=divlist,
+                        qual=quallist, seq=seqlist,
+                        all=totallist)
+    maxnum <- switch(type, div=divnum,
+                     qual=qualnum,
+                     seq=seqnum,
+                     all=totnum)
+    if(!is.null(select)){colorlist <- colorlist[select]
+    maxnum <- maxnum[select]
+    if(any(is.na(colorlist)))
+      stop(paste("Illegal value(s) of select: ",
+                 paste(select[is.na(colorlist)],
+                       collapse=" ")))
+    }
+
+    if (colorblindFriendly) {
+      colorlist <- colorlist[names(colorlist) %in% c(colorblindlist,"gap1","gap2")]
+      maxnum <- maxnum[names(maxnum) %in% c(colorblindlist,"gap1","gap2")]
+    }
+
+
+
+
+
+    palattr <-  switch(type,  qual="qualitative",  div
+                       ="divergent", seq="sequential",
+                       all="qualitative+divergent+sequential")
+
+    if(is.null(n))n <- maxnum
+    if(length(n)==1)n <- rep(n, length(colorlist))
+
+    if(exact.n){
+      keep <- n<=maxnum
+      colorlist <- colorlist[keep]
+      n <- n[keep]
+      maxnum <- maxnum[keep]
+    }
+
+
+
+    if (any(n < 3) | exact.n & any(n>maxnum)|
+        length(n)!=length(colorlist)){
+      warning("Illegal vector of color numbers")
+      print(paste(n, collapse=" "))
+    }
+    n[n<3] <- 3
+    n[n>maxnum] <- maxnum[n>maxnum]
+
+    nr <- length(colorlist)
+    nc <- max(n)
+
+    ylim <- c(0,nr)
+    oldpar <- par(mgp=c(2,0.25,0))
+    on.exit(par(oldpar))
+    plot(1,1,xlim=c(0,nc),ylim=ylim,type="n", axes=FALSE, bty="n",
+         xlab="",ylab="")
+    for(i in 1:nr)
+    {nj <- n[i]
+    if (colorlist[i]=="") next
+    shadi <- brewer.pal(nj, colorlist[i])
+    rect(xleft=0:(nj-1), ybottom=i-1, xright=1:nj, ytop=i-0.2, col=shadi,
+         border="light grey")
+    }
+    text(rep(-0.1,nr),(1:nr)-0.6, labels=colorlist, xpd=TRUE, adj=1)
+  }
+
+
+#' Plot Palette And Its Color Vision Deficiencies
+#'
+#' Plot of the original input palette and simulations of color vision deficiencies - deuteranopia, protanopia, and tritanopia.
+#'
+#' @param x A vector of hexadecimal color descriptions
+#' @param severity Severity of the color vision defect, a number between 0 and 1
+#'
+#' @importFrom graphics par plot rect text
+#'
+#' @seealso palette_bivariate_plot
+#'
+#' @return A plot with the original input palette and simulations of color vision deficiencies - deuteranopia, protanopia, and tritanopia
+#' @export
+#'
+#' @examples
+#' rainbow_pal = rainbow(n = 7)
+#' rainbow_pal
+#' palette_plot(rainbow_pal)
+#'
+#' palette_plot(x = rcartocolor::carto_pal(7, "Sunset"))
+#' palette_plot(x = rcartocolor::carto_pal(11, "Safe"))
+#' palette_plot(x = rcartocolor::carto_pal(7, "Earth"))
+#' palette_plot(x = rcartocolor::carto_pal(11, "Vivid"))
+
+palette_plot = function(x, severity = 1){
+  deu = colorspace::deutan(x, severity = severity)
+  pro = colorspace::protan(x, severity = severity)
+  tri = colorspace::tritan(x, severity = severity)
+
+  y = list(tri, pro, deu, x)
+
+  my_n = length(x)
+  n_colors = 4
+  ylim = c(0, n_colors)
+
+  oldpar = par(mgp = c(2, 0.25, 0))
+  on.exit(par(oldpar))
+  plot(
+    1,
+    1,
+    xlim = c(0, max(my_n)),
+    ylim = ylim,
+    type = "n",
+    axes = FALSE,
+    bty = "n",
+    xlab = "",
+    ylab = ""
+  )
+
+  for (i in seq_len(n_colors)) {
+    rect(
+      xleft = 0:(my_n - 1),
+      ybottom = i - 1,
+      xright = 1:my_n,
+      ytop = i - 0.2,
+      col = y[[i]],
+      border = "light grey"
+    )
+  }
+  text(
+    rep(0, n_colors),
+    (1:n_colors) - 0.6,
+    labels = c("Tritanopia", "Protanopia", "Deuteranopia", "Normal"),
+    xpd = TRUE,
+    adj = 1
+  )
+}
+
+#' Plot Bivariate Palette And Its Color Vision Deficiencies
+#'
+#' Plot of the original input bivariate palette and simulations of color vision deficiencies - deuteranopia, protanopia, and tritanopia.
+#'
+#' @param x A vector of hexadecimal color descriptions
+#' @param severity Severity of the color vision defect, a number between 0 and 1
+#'
+#' @seealso palette_plot
+#'
+#' @return A plot with the original input palette and simulations of color vision deficiencies - deuteranopia, protanopia, and tritanopia
+#'
+#' @export
+#'
+#' @examples
+#' palette_bivariate_plot(x = rcartocolor::carto_pal(4, "Sunset"))
+palette_bivariate_plot = function(x, severity = 1){
+  deu = colorspace::deutan(x, severity = severity)
+  pro = colorspace::protan(x, severity = severity)
+  tri = colorspace::tritan(x, severity = severity)
+
+  y = rev(list(tri, pro, deu, x))
+  labels = rev(c("Tritanopia", "Protanopia", "Deuteranopia", "Normal"))
+
+  my_n = length(x)
+  n_colors = 4
+  ylim = c(0, n_colors)
+
+  ncol = length(x)
+  # if(missing(nx)) {
+  nx = sqrt(ncol)
+  # }
+  # if(missing(ny)) {
+  ny = nx
+  # }
+
+  oldpar = par(mfrow = c(2, 2), mar = rep(1, 4))
+  on.exit(par(oldpar))
+
+  for (i in seq_len(n_colors)) {
+    graphics::image(
+      matrix(1:ncol, nrow = ny),
+      axes = FALSE,
+      col = y[[i]],
+      main = labels[[i]],
+      asp = 1
+    )
+  }
+
+}
+
+
+
+
+#' Function to print color palettes
+#'
+#' @param name: Name of color palette desired.
+#'     Use \code{colRoz_pal} variables to control which palette is displayed.
+#' @param n: Number of colors desired If omitted, uses all colours.
+#' @param type: Select discrete or continuous (default) colour choices.
+#' @export
+#' @examples
+#' print_palette(colRoz_pal("grandis", n=3, type = "discrete"))
+#' print_palette(colRoz_pal("c.decresii"))
+#'
+print_palette <- function(x, ...) {
+  n <- length(x)
+  old <- par(mar = c(0.5, 0.5, 0.5, 0.5))
+  on.exit(par(old))
+
+  image(1:n, 1, as.matrix(1:n), col = x,
+        ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+
+  rect(0, 0.9, n + 1, 1.1, col = rgb(1, 1, 1, 0.8), border = NA)
+  text((n + 1) / 2, 1, labels = attr(x, "name"), cex = 3, family = "sans")
+}
+
+
+
+#' Show the different scico palettes
+#'
+#' This is a simple function to show a gradient of the different palettes
+#' available in the `scico` package
+#'
+#' @param palettes One or more palette names to show
+#'
+#'
+#' @importFrom grDevices n2mfrow
+#' @importFrom graphics image par
+#' @export
+#'
+#' @examples
+#'
+#' scico_palette_show()
+#'
+scico_palette_show <- function(palettes = scico_palette_names()) {
+  dims <- n2mfrow(length(palettes))
+  oldpar <- par(mfrow = dims, mai = par('mai')/5)
+  on.exit(par(oldpar))
+
+  for (i in palettes) {
+    image(matrix(1:100, ncol = 1), col = scico(100, palette = i), main = i, axes = FALSE)
+  }
+}
+
+
+
+carto_pal_name = function(palette, type) {
+  if (is.character(palette)) {
+    if (!palette %in% rcartocolor::cartocolors$Name) {
+      warning("Unknown palette ", palette)
+      palette = "Mint"
+    }
+    return(palette)
+  }
+
+  type = match.arg(type, unique(rcartocolor::cartocolors$Type))
+  rcartocolor::cartocolors$Name[rcartocolor::cartocolors$Type == type][palette]
+}
+
+
+#' CARTOcolor palette viewer
+#'
+#' Displays a color palette from CARTOcolor
+#'
+#' @param n Number of different colors in the palette, minimum depending on palette (2 or 3), maximum depending on palette (7 or 11)
+#' @param name A palette name
+#'
+#' @importFrom graphics image
+#'
+#' @examples
+#' display_carto_pal(7, "Burg")
+#'
+#' @export
+display_carto_pal = function(n = NULL, name){
+  selected_colors = carto_pal(n, name)
+  selected_type = rcartocolor::cartocolors[rcartocolor::cartocolors$Name == name, "Type"][[1]]
+  image(1:n, 1, as.matrix(1:n), col = selected_colors,
+        main = paste0(name, ": ", selected_type, " (", n ,")"),
+        xlab = " ", ylab = " ", xaxt = "n", yaxt = "n", bty="n")
+}
+
+#' CARTOcolor palettes viewer
+#'
+#' Displays a set of the color palettes from CARTOcolor
+#'
+#' @param n Number of different colors in the palette, minimum depending on the palette (2 or 3), maximum depending on the palette (7 or 11)
+#' @param type Type of the palette, can be "quantitative", "diverging", "qualitative", "aggregation", or "all"
+#' @param colorblind_friendly if TRUE, display only colorblind friendly palettes
+#'
+#' @importFrom graphics par plot rect text
+#'
+#' @examples
+#' display_carto_all()
+#' display_carto_all(type = "quantitative")
+#' display_carto_all(type = c("diverging", "qualitative", "aggregation"))
+#' display_carto_all(3, type = "quantitative")
+#' display_carto_all(7, type = "quantitative")
+#' display_carto_all(7, colorblind_friendly = TRUE)
+#' display_carto_all(7, type = c("diverging", "qualitative", "aggregation"),
+#'   colorblind_friendly = TRUE)
+#'
+#' @export
+display_carto_all = function(n = NULL, type = "all", colorblind_friendly = NULL){
+  if(any(type == "all")){
+    selected_type = rcartocolor::cartocolors
+  } else if (any(type %in% c("quantitative", "diverging", "qualitative", "aggregation"))){
+    selected_type = rcartocolor::cartocolors[rcartocolor::cartocolors$Type %in% type, ]
+  } else{
+    stop(paste(type, "is not a valid name for a color type\n"))
+  }
+  selected_metadata = rcartocolor::metacartocolors[rcartocolor::metacartocolors$Name %in% selected_type$Name, ]
+
+  if(isTRUE(colorblind_friendly)){
+    selected_metadata = selected_metadata[selected_metadata$Colorblind_friendly, ]
+  }
+
+  n_colors = nrow(selected_metadata)
+
+  if(is.null(n)){
+    my_n = selected_metadata$Max_n
+  } else{
+    my_n = rep(n, n_colors)
+  }
+
+  selected_colors = vector("list", n_colors)
+
+  ylim = c(0, n_colors)
+  oldpar = par(mgp = c(2, 0.25, 0))
+  on.exit(par(oldpar))
+  plot(1, 1, xlim = c(0, max(my_n)), ylim = ylim,
+       type = "n", axes = FALSE, bty = "n", xlab = "", ylab = "")
+
+  for(i in seq_len(n_colors)){
+    one_color = carto_pal(n = my_n[i], name = selected_metadata$Name[i])
+    rect(xleft = 0:(my_n[i] - 1), ybottom = i - 1, xright = 1:my_n[i], ytop = i-0.2, col = one_color,
+         border = "light grey")
+  }
+  text(rep(-0.1, n_colors), (1: n_colors) - 0.6, labels = selected_metadata$Name, xpd = TRUE, adj = 1)
+}
+
+
+
+#' Palette Plot in HCL Space
+#'
+#' Visualization of color palettes in HCL space projections.
+#'
+#' The function \code{hclplot} is an auxiliary function for illustrating
+#' the trajectories of color palettes in two-dimensional HCL space projections.
+#' It collapses over one of the three coordinates (either the hue H or the
+#' luminance L) and displays a heatmap of colors combining the remaining
+#' two dimensions. The coordinates for the given color palette are highlighted
+#' to bring out its trajectory.
+#'
+#' The function \code{hclplot} has been designed to work well with the
+#' \code{\link{hcl_palettes}} in this package. While it is possible to apply
+#' it to other color palettes as well, the results might look weird or confusing
+#' if these palettes are constructed very differently (e.g., as in the highly
+#' saturated base R palettes).
+#'
+#' More specifically, the following palettes can be visualized well: \itemize{
+#'   \item Qualitative with (approximately) constant luminance. In this case,
+#'      \code{hclplot} shows a hue-chroma plane (in polar coordinates), keeping
+#'      luminance at a fixed level (by default displayed in the main title of
+#'      the plot). If the luminance is, in fact, not approximately constant,
+#'      the luminance varies along with hue and chroma, using a simple linear
+#'      function (fitted by least squares).
+#    \item Sequential with (approximately) constant hue. In this case,
+#'      \code{hclplot} shows a chroma-luminance plane, keeping hue at a fixed
+#'      level (by default displayed in the main title of the plot). If the hue
+#'      is, in fact, not approximately constant, the hue varies along with
+#'      chroma and luminance, using a simple linear function (fitted by least
+#'      squares.
+#'   \item Diverging with two (approximately) constant hues: This case is
+#'      visualized with two back-to-back sequential displays.
+#' }
+#' To infer the type of display to use, by default, the following heuristic is
+#' used: If luminance is not approximately constant (range > 10) and follows
+#' rougly a triangular pattern, a diverging display is used. If luminance is
+#' not constant and follows roughly a linear pattern, a sequential display is
+#' used. Otherwise a qualitative display is used.
+#'
+#' @param x character vector containing color hex codes, or a \code{\link{color-class}}
+#' object.
+#' @param type type character specifying which type of palette should be visualized
+#' (\code{"qualitative"}, \code{"sequential"}, or \code{"diverging"}).
+#' For qualitative palettes a hue-chroma plane is used, otherwise a chroma-luminance plane.
+#' By default, the \code{type} is inferred from the luminance trajectory corresponding
+#' to \code{x}.
+#' @param h numeric hue(s) to be used for \code{type = "sequential"} and \code{type = "diverging"}.
+#' By default, these are inferred from the colors in \code{x}.
+#' @param c numeric. Maximal chroma value to be used.
+#' @param l numeric luminance(s) to be used for \code{type = "qualitative"}.
+#' By default, this is inferred from the colors in \code{x}.
+#' @param xlab,ylab,main character strings for annotation, by default generated from
+#' the type of color palette visualized.
+#' @param cex numeric character extension.
+#' @param axes logical. Should axes be drawn?
+#' @param bg,lwd,size graphical control parameters for the color palette trajectory.
+#' @param \dots currently not used.
+#'
+#' @return \code{hclplot} invisibly returns a matrix with the HCL coordinates corresponding to \code{x}.
+#' @seealso \code{\link{specplot}}
+#' @references Zeileis A, Fisher JC, Hornik K, Ihaka R, McWhite CD, Murrell P, Stauffer R, Wilke CO (2020).
+#' \dQuote{colorspace: A Toolbox for Manipulating and Assessing Colors and Palettes.}
+#' \emph{Journal of Statistical Software}, \bold{96}(1), 1--49. \doi{10.18637/jss.v096.i01}
+#' @keywords hplot
+#' @examples
+#' ## for qualitative palettes luminance and chroma are fixed, varying only hue
+#' hclplot(qualitative_hcl(9, c = 50, l = 70))
+#'
+#' ## single-hue sequential palette (h = 260) with linear vs. power-transformed trajectory
+#' hclplot(sequential_hcl(7, h = 260, c = 80, l = c(35, 95), power = 1))
+#' hclplot(sequential_hcl(7, h = 260, c = 80, l = c(35, 95), power = 1.5))
+#'
+#' ## advanced single-hue sequential palette with triangular chroma trajectory
+#' ## (piecewise linear vs. power-transformed)
+#' hclplot(sequential_hcl(7, h = 245, c = c(40, 75, 0), l = c(30, 95), power = 1))
+#' hclplot(sequential_hcl(7, h = 245, c = c(40, 75, 0), l = c(30, 95), power = c(0.8, 1.4)))
+#'
+#' ## multi-hue sequential palette with small hue range and triangular chroma vs.
+#' ## large hue range and linear chroma trajectory
+#' hclplot(sequential_hcl(7, h = c(260, 220), c = c(50, 75, 0), l = c(30, 95), power = 1))
+#' hclplot(sequential_hcl(7, h = c(260, 60), c = 60, l = c(40, 95), power = 1))
+#'
+#' ## balanced diverging palette constructed from two simple single-hue sequential
+#' ## palettes (for hues 260/blue and 0/red)
+#' hclplot(diverging_hcl(7, h = c(260, 0), c = 80, l = c(35, 95), power = 1))
+#'
+#' @export hclplot
+#' @importFrom graphics box lines mtext par plot points rect text
+#' @importFrom stats cor lm median predict
+hclplot <- function(x, type = NULL, h = NULL, c = NULL, l = NULL,
+                    xlab = NULL, ylab = NULL, main = NULL, cex = 1.0, axes = TRUE,
+                    bg = "white", lwd = 1, size = 2.5, ...)
+{
+
+  ## TODO: Not yet able to handle NA values. Thus, replace
+  ## NA values with white, if needed.
+  NAidx <- which(is.na(x)); if (length(NAidx) > 0) x[NAidx] <- "#FFFFFF"
+  ## convert to HCL coordinates
+  if(is.character(x)) {
+    HCL <- hex2RGB(x)
+  } else {
+    HCL <- x
+    x <- hex(x)
+  }
+  HCL <- coords(as(HCL, "polarLUV"))[, c("H", "C", "L")]
+  n <- nrow(HCL)
+
+  ## determine type of palette based on luminance trajectory
+  lran <- diff(range(HCL[, "L"], na.rm = TRUE))
+  llin <- cor(HCL[, "L"], 1L:n, use = "pairwise.complete.obs")^2
+  ltri <- cor(HCL[, "L"], abs(1L:n - (n + 1)/2), use = "pairwise.complete.obs")^2
+  if(is.null(type)) {
+    type <- if(ltri > 0.75 & lran > 10) {
+      "diverging"
+    } else if(llin > 0.75 & lran > 10) {
+      "sequential"
+    } else {
+      "qualitative"
+    }
+  } else {
+    type <- match.arg(type, c("diverging", "sequential", "qualitative"))
+  }
+
+  ## FIXME: put into separate function
+  if(n > 1L) {
+    for(i in 2L:n) {
+      if ( any(is.na(HCL[(i-1L):i,])) ) next
+      d <- HCL[i, "H"] - HCL[i - 1L, "H"]
+      if (abs(d) > 320) HCL[i, "H"] <- HCL[i, "H"] - sign(d) * 360
+      if (abs(HCL[i, "H"]) >  360) HCL[1L:i, "H"] <- HCL[1L:i, "H"] - sign(HCL[i, "H"]) * 360
+    }
+
+    # (2) Smoothing hue values in batches where chroma is very low
+    idx <- which(HCL[, "C"] < 8)
+    if (length(idx) == n) {
+      HCL[,"H"] <- mean(HCL[,"H"])
+    } else if (length(idx) > 0L) {
+      ## pre-smooth hue
+      if(n >= 49L) {
+        HCL[, "H"] <- 1/3 * (
+          HCL[c(rep.int(1L, 2L), 1L:(n - 2L)), "H"] +
+            HCL[c(rep.int(1L, 1L), 1L:(n - 1L)), "H"] +
+            HCL[                   1L:n,         "H"])
+      }
+      idxs <- split(idx, cumsum(c(1, diff(idx)) > 1))
+      s <- 1L
+      while(length(idxs) > 0L) {
+        e <- if(s %in% idxs[[1L]]) {
+          if(length(idxs) > 1L) idxs[[2L]] - 1L else n
+        } else {
+          if(n %in% idxs[[1L]]) n else round(mean(range(idxs[[1L]])))
+        }
+        io <- split(s:e, s:e %in% idx)
+        if (length(io) == 2L & sum(!is.na(HCL[io[["FALSE"]],"H"])) > 0) {
+          HCL[io[["TRUE"]], "H"] <- stats::spline(io[["FALSE"]], HCL[io[["FALSE"]], "H"],
+                                                  xout = io[["TRUE"]], method = "natural")$y
+        }
+        idxs[[1L]] <- NULL
+        s <- e + 1L
+      }
+    }
+  }
+
+  maxchroma <- if(!is.null(c)) ceiling(c) else pmax(100, pmin(180, ceiling(max(HCL[, "C"], na.rm = TRUE)/20) * 20))
+
+  switch(type,
+         "sequential" = {
+           opar <- par(cex = cex, mar = c(3, 3, 2, 1) * cex, no.readonly = TRUE)
+           on.exit(par(opar))
+           nd <- expand.grid(C = 0:maxchroma, L = 0:100)
+           if(!is.null(h)) {
+             nd$H <- h
+           } else if(n < 3L || diff(range(HCL[, "H"], na.rm = TRUE)) < 12) {
+             nd$H <- median(HCL[, "H"], na.rm = TRUE)
+           } else {
+             m <- lm(H ~ C + L, data = as.data.frame(HCL))
+             sig <- summary(m)$sigma
+             if(is.na(sig) || sig > 7.5) warning("cannot approximate H well as a linear function of C and L")
+             nd$H <- predict(m, nd)
+           }
+           if(is.null(main)) {
+             main <- if(length(unique(nd$H)) <= 1L) {
+               round(nd$H[1L])
+             } else {
+               paste("[", round(min(nd$H, na.rm = TRUE)), ", ", round(max(nd$H, na.rm = TRUE)), "]", sep = "")
+             }
+             main <- paste("Hue =", main)
+           }
+           HCL2 <- hex(polarLUV(H = nd$H, C = nd$C, L = nd$L), fixup = FALSE)
+           HCL2[nd$L < 1 & nd$C > 0] <- NA
+           plot(0, 0, type = "n", xlim = c(0, maxchroma), ylim = c(0, 100), xaxs = "i", yaxs = "i",
+                xlab = NA, ylab = NA, main = main, axes = axes)
+           # Adding axis labels
+           if(axes) {
+             if ( is.null(xlab) ) xlab <- "Chroma"
+             if ( is.null(ylab) ) ylab <- "Luminance"
+             mtext(side = 1, line = 2 * cex, xlab, cex = cex)
+             mtext(side = 2, line = 2 * cex, ylab, cex = cex)
+           }
+           # Adding colors
+           points(nd$C, nd$L, col = HCL2, pch = 19, cex = 3)
+           points(HCL[, 2L:3L], pch = 19, cex = 1.1 * size * cex,  type = "p", lwd = 5 * lwd, col = bg)
+           points(HCL[, 2L:3L], pch = 21, bg = x, cex = size * cex, type = "o", lwd = lwd)
+           box()
+         },
+         "diverging" = {
+           opar <- par(cex = cex, mar = c(3, 3, 2, 1) * cex, no.readonly = TRUE)
+           on.exit(par(opar))
+           nd <- expand.grid(C = -maxchroma:maxchroma, L = 0:100)
+           nd$H <- NA
+           nd$left <- nd$C < 0
+           left  <- 1L:floor(n/2)
+           left  <- left[HCL[left, "C"] > 10]
+           right <- ceiling(n/2):n
+           right <- right[HCL[right, "C"] > 10]
+
+           if(!is.null(h)) {
+             if(length(h) == 2L) {
+               nd$H[nd$left]  <- h[1L]
+               nd$H[!nd$left] <- h[2L]
+             } else {
+               nd$H <- h
+             }
+           } else if(n < 6L || (diff(range(HCL[left, "H"]  - min(HCL[ left, "H"], na.rm = TRUE), na.rm = TRUE)) < 12 &
+                                diff(range(HCL[right, "H"] - min(HCL[right, "H"], na.rm = TRUE), na.rm = TRUE)) < 12)) {
+             nd$H[nd$left]  <- median(HCL[ left, "H"] - min(HCL[ left, "H"], na.rm = TRUE), na.rm = TRUE) + min(HCL[ left, "H"], na.rm = TRUE)
+             nd$H[!nd$left] <- median(HCL[right, "H"] - min(HCL[right, "H"], na.rm = TRUE), na.rm = TRUE) + min(HCL[right, "H"], na.rm = TRUE)
+           } else {
+             HCLdata <- as.data.frame(HCL)
+             HCLdata$left <- factor(rep(c(TRUE, FALSE), c(floor(n/2), ceiling(n/2))))
+             nd$left <- factor(nd$left)
+             m <- lm(H ~ left * (C + L), data = HCLdata)
+             sig <- summary(m)$sigma
+             if(is.na(sig) || sig > 7.5) warning("cannot approximate H well as a linear function of C and L")
+             nd$H <- predict(m, nd)
+             nd$left <- nd$left == "TRUE"
+           }
+           if(is.null(main)) {
+             main <- if(length(unique(nd$H)) <= 2L) {
+               paste(round(nd$H[nd$left][1L]), "/", round(nd$H[!nd$left][1L]))
+             } else {
+               paste("[",
+                     round(min(nd$H[nd$left], na.rm = TRUE)), ", ", round(max(nd$H[nd$left], na.rm = TRUE)), "] / [",
+                     round(min(nd$H[!nd$left], na.rm = TRUE)), ", ", round(max(nd$H[!nd$left], na.rm = TRUE)), "]", sep = "")
+             }
+             main <- paste("Hue =", main)
+           }
+           HCL2 <- hex(polarLUV(H = nd$H, C = abs(nd$C), L = nd$L), fixup = FALSE)
+           HCL2[nd$L < 1 & abs(nd$C) > 0] <- NA
+           plot(0, 0, type = "n", xlim = c(-1, 1) * maxchroma, ylim = c(0, 100), xaxs = "i", yaxs = "i",
+                xlab = NA, ylab = NA, main = main, axes = FALSE)
+           # Axis labels
+           if(axes) {
+             if ( is.null(xlab) ) xlab <- "Chroma"
+             if ( is.null(ylab) ) ylab <- "Luminance"
+             mtext(side = 1, line = 2 * cex, xlab, cex = cex)
+             mtext(side = 2, line = 2 * cex, ylab, cex = cex)
+             at1 <- pretty(c(-1, 1) * maxchroma)
+             axis(1, at = at1, labels = abs(at1))
+             axis(2)
+           }
+           # Plotting colors
+           points(nd$C, nd$L, col = HCL2, pch = 19, cex = 3)
+           points( HCL[, "C"] * ifelse(1L:n <= floor(mean(n/2)), -1, 1),
+                   HCL[, "L"], pch = 19, cex = 1.1 * size * cex,  type = "p", lwd = 5 * lwd, col = bg)
+           points( HCL[, "C"] * ifelse(1L:n <= floor(mean(n/2)),-1,1),
+                   HCL[, "L"], pch = 21, bg = x, cex = size * cex, type = "o", lwd = lwd)
+           box()
+         },
+         "qualitative" = {
+           opar <- par(cex = cex, mar = c(1, 1, 2, 1) * cex, bty = "n", no.readonly = TRUE)
+           on.exit(par(opar))
+           nd <- expand.grid(H = 0:180 * 2, C = 0:maxchroma)
+
+           if(!is.null(l)) {
+             nd$L <- l
+           } else if(n < 3L || diff(range(HCL[, "L"], na.rm = TRUE)) < 10) {
+             nd$L <- median(HCL[, "L"], na.rm = TRUE)
+           } else {
+             m <- lm(L ~ C + H, data = as.data.frame(HCL))
+             sig <- summary(m)$sigma
+             if(is.na(sig) || sig > 7.5) warning("cannot approximate L well as a linear function of H and C")
+             nd$L <- predict(m, nd)
+             nd$L <- pmin(100, pmax(0, nd$L))
+           }
+           if(is.null(main)) {
+             main <- if(length(unique(nd$L)) <= 1L) {
+               round(nd$L[1L])
+             } else {
+               paste("[", round(min(nd$L, na.rm = TRUE)), ", ", round(max(nd$L, na.rm = TRUE)), "]", sep = "")
+             }
+             main <- paste("Luminance =", main)
+           }
+           HCL2 <- hex(polarLUV(H = nd$H, C = nd$C, L = nd$L), fixup = FALSE)
+           HCL2[nd$L < 1 & nd$C > 0] <- NA
+
+           # fact: used for scaling
+           fact <- 1.1 + (cex - 1) / 10
+           plot(0, 0, type = "n", axes = FALSE, xlab = NA, ylab = NA, main = main,
+                xlim = c(-maxchroma, maxchroma) * fact, ylim = c(-maxchroma, maxchroma) * fact, asp = 1)
+           xpos <- function(h, c) cos(h * pi/180) * c
+           ypos <- function(h, c) sin(h * pi/180) * c
+           points(xpos(nd$H, nd$C), ypos(nd$H, nd$C), col = HCL2, pch = 19, cex = 3)
+           lines(xpos(0:360, maxchroma), ypos(0:360, maxchroma))
+
+           if(axes) {
+             if(is.null(xlab)) xlab <- "Chroma"
+             if(is.null(ylab)) ylab <- "Hue"
+             at.c <- if(maxchroma >= 150) 0:3 * 50 else 0:3 * 25
+             at.h <- 0:6 * 60
+             lines(c(0, maxchroma), c(0, 0))
+             text(at.c, rep(-7, length(at.c)), at.c)
+             text(50, -14, xlab)
+             rect(at.c, 0, at.c, -3)
+             if(0 %in% at.h | 360 %in% at.h) {
+               lines(xpos(0, maxchroma + c(0, 3)), ypos(0, maxchroma + c(0, 3)))
+               text(xpos(0, maxchroma + 7), ypos(0, maxchroma + 7), 0, pos = 3)
+               text(xpos(0, maxchroma + 7), ypos(0, maxchroma + 7), 360, pos = 1)
+               text(xpos(0, maxchroma + 16), ypos(0, maxchroma + 16), ylab)
+             }
+             at.h <- at.h[at.h > 0 & at.h < 360]
+             for(hue in at.h) {
+               text(xpos(hue, maxchroma + 7), ypos(hue, maxchroma + 7), hue)
+               lines(xpos(hue, maxchroma + c(0, 3)), ypos(hue, maxchroma + c(0, 3)))
+             }
+           }
+           points(xpos(HCL[, "H"], HCL[, "C"]), ypos(HCL[, "H"], HCL[, "C"]),
+                  pch = 19, cex = 1.1 * size * cex,  type = "p", lwd = 5 * lwd, col = bg)
+           points(xpos(HCL[, "H"], HCL[, "C"]), ypos(HCL[, "H"], HCL[, "C"]),
+                  pch = 21, bg = x, cex = size * cex, type = "o", lwd = lwd)
+           box()
+         }
+  )
+
+  invisible(HCL)
+}
+
+
+#' @rdname hcl_palettes
+#' @export
+print.hcl_palettes <- function(x, ...) {
+  if(nrow(x) > 1L) {
+    type <- unique(as.character(x$type))
+    cat("HCL palettes\n")
+    for(ty in type) {
+      cat("\nType: ", ty, "\n")
+      cat("Names: ")
+      writeLines(strwrap(paste(rownames(x)[as.character(x$type) %in% ty], collapse = ", "), exdent = 7), ...)
+    }
+  } else {
+    cat("HCL palette")
+    cat("\nName:", rownames(x))
+    cat("\nType:", as.character(x$type))
+    cat("\nParameter ranges:\n")
+    print.data.frame(x[ , 2L:11L, drop = FALSE], row.names = FALSE, ...)
+  }
+  invisible(x)
+}
+
+
+
+#' @rdname hcl_palettes
+#' @export
+summary.hcl_palettes <- function(object, ...) {
+  type <- unique(as.character(object$type))
+  cat("HCL palettes\n")
+  for(ty in type) {
+    cat("\nType:", ty, "\n")
+    cat("Parameter ranges:\n")
+    print.data.frame(object[as.character(object$type) %in% ty, -1L, drop = FALSE], ...)
+  }
+  invisible(object)
+}
+
+#' @rdname hcl_palettes
+#' @method plot hcl_palettes
+#' @export
+plot.hcl_palettes <- function(x, n = 5L, fixup = TRUE, off = NULL, border = NULL, ...)
+{
+  typ <- c("Qualitative", "Sequential (single-hue)", "Sequential (multi-hue)", "Diverging", "Diverging (flexible)")
+  x$type <- as.character(x$type)
+  xx <- as.matrix(x[, -1L])
+
+  qcol <- sapply(which(x$type == typ[1L]), function(i) {
+    qualitative_hcl(n = n, h1 = xx[i, "h1"], h2 = xx[i, "h2"], c1 = xx[i, "c1"], l1 = xx[i, "l1"], fixup = fixup)
+  })
+  qcol <- if(length(qcol) < 1L) NULL else matrix(t(qcol), ncol = n,
+                                                 dimnames = list(rownames(x)[x$type == typ[1L]], paste("Color", 1L:n)))
+
+  scol <- sapply(which(x$type == typ[2L]), function(i) {
+    sequential_hcl(n = n, h1 = xx[i, "h1"], c1 = xx[i, "c1"], c2 = xx[i, "c2"], l1 = xx[i, "l1"], l2 = xx[i, "l2"],
+                   p1 = xx[i, "p1"], p2 = xx[i, "p2"], cmax = xx[i, "cmax"], fixup = fixup)
+  })
+  scol <- if(length(scol) < 1L) NULL else matrix(t(scol), ncol = n,
+                                                 dimnames = list(rownames(x)[x$type == typ[2L]], paste("Color", 1L:n)))
+
+  mcol <- sapply(which(x$type == typ[3L]), function(i) {
+    sequential_hcl(n = n, h1 = xx[i, "h1"], h2 = xx[i, "h2"], c1 = xx[i, "c1"], c2 = xx[i, "c2"], l1 = xx[i, "l1"], l2 = xx[i, "l2"],
+                   p1 = xx[i, "p1"], p2 = xx[i, "p2"], cmax = xx[i, "cmax"], fixup = fixup)
+  })
+  mcol <- if(length(mcol) < 1L) NULL else matrix(t(mcol), ncol = n,
+                                                 dimnames = list(rownames(x)[x$type == typ[3L]], paste("Color", 1L:n)))
+
+  dcol <- sapply(which(x$type == typ[4L]), function(i) {
+    diverging_hcl(n = n, h1 = xx[i, "h1"], h2 = xx[i, "h2"], c1 = xx[i, "c1"], l1 = xx[i, "l1"], l2 = xx[i, "l2"],
+                  p1 = xx[i, "p1"], p2 = xx[i, "p2"], cmax = xx[i, "cmax"], fixup = fixup)
+  })
+  dcol <- if(length(dcol) < 1L) NULL else matrix(t(dcol), ncol = n,
+                                                 dimnames = list(rownames(x)[x$type == typ[4L]], paste("Color", 1L:n)))
+
+  xcol <- sapply(which(x$type == typ[5L]), function(i) {
+    divergingx_hcl(n = n, h1 = xx[i, "h1"], h2 = xx[i, "h2"], h3 = xx[i, "h3"],
+                   c1 = xx[i, "c1"], c2 = xx[i, "c2"], c3 = xx[i, "c3"],
+                   l1 = xx[i, "l1"], l2 = xx[i, "l2"], l3 = xx[i, "l3"],
+                   p1 = xx[i, "p1"], p2 = xx[i, "p2"], p3 = xx[i, "p3"], p4 = xx[i, "p4"],
+                   cmax1 = xx[i, "cmax1"], cmax2 = xx[i, "cmax2"],
+                   fixup = fixup)
+  })
+  xcol <- if(length(xcol) < 1L) NULL else matrix(t(xcol), ncol = n,
+                                                 dimnames = list(rownames(x)[x$type == typ[5L]], paste("Color", 1L:n)))
+
+  ## collect colors
+  col <- list(qcol, scol, mcol, dcol, xcol)
+  names(col) <- typ
+  col <- col[!sapply(col, is.null)]
+
+  swatchplot(col, off = off, border = border, ...)
+}
+
+
+#' Palette Swatch Plot
+#'
+#' Visualization of color palettes in columns of color swatches.
+#'
+#' The function \code{swatchplot} is a convenience function for displaying
+#' collections of palettes that can be specified as lists or matrices of
+#' character color specifications. Essentially, the function just calls
+#' \code{\link[graphics]{rect}} but the value-added are the heuristics used
+#' for choosing default labels, margins, spacings, borders. These are selected
+#' to work well for \code{\link{hcl_palettes}} and might need further tweaking
+#' in future versions.
+#'
+#' @param x character vector/matrix (or list of character vectors/matrices)
+#' containing color hex codes.
+#' @param \dots further (possibly named) character vectors/matrices with color
+#' hex codes.
+#' @param nrow integer specifying the maximal number of rows of swatches.
+#' (The actual number might be lower in order to balance the rows used in each column.)
+#' @param border color for border of individual color rectangles. By default
+#' \code{"lightgray"} for up to 9 colors, \code{"transparent"} otherwise.
+#' @param sborder color for border of the entire palette swatch. By default
+#' \code{"lightgray"} if \code{border} is \code{"transparent"} and \code{"lightgray"}
+#' otherwise (if \code{off = 0}).
+#' @param off numeric vector of length 2. Offset in horizontal and vertical direction
+#' (specified as a fraction of the rectangle for one color). By default, the
+#' horizontal offset is \code{0.3} for up to 5 colors and \code{0} otherwise,
+#' and the vertical offset is \code{0.1}.
+#' @param mar numeric vector of length 4, specifying the margins of column
+#' of color swatches.
+#' @param line numeric. Line in which the palette names (if any) are printed
+#' in the margin.
+#' @param cex,font numeric vectors of length 1 or 2. Specifications for the
+#' annotation text for the individual palettes and lists of palettes, respectively.
+#' @param cvd logical or character indicating whether color vision deficiencies
+#' should be emulated with \code{\link{desaturate}}, \code{\link{deutan}},
+#' \code{\link{protan}}, \code{\link{tritan}}.
+#' @return \code{swatchplot} invisibly returns a matrix with colors and annotations.
+#' @references Zeileis A, Fisher JC, Hornik K, Ihaka R, McWhite CD, Murrell P, Stauffer R, Wilke CO (2020).
+#' \dQuote{colorspace: A Toolbox for Manipulating and Assessing Colors and Palettes.}
+#' \emph{Journal of Statistical Software}, \bold{96}(1), 1--49. \doi{10.18637/jss.v096.i01}
+#' @keywords hplot
+#' @examples
+#' ## swatches of several palette vectors
+#' swatchplot(
+#'   "Hue"       = sequential_hcl(5, h = c(0, 300), c = c(60, 60), l = 65),
+#'   "Chroma"    = sequential_hcl(5, h = 0, c = c(100, 0), l = 65, rev = TRUE, power = 1),
+#'   "Luminance" = sequential_hcl(5, h = 260, c = c(25, 25), l = c(25, 90), rev = TRUE, power = 1),
+#'   off = 0
+#' )
+#'
+#' ## swatches of named palette matrices
+#' bprg <- c("Blues", "Purples", "Reds", "Greens")
+#' swatchplot(
+#'   "Single-hue"            = t(sapply(paste(bprg, 2), sequential_hcl, n = 7)),
+#'   "Single-hue (advanced)" = t(sapply(paste(bprg, 3), sequential_hcl, n = 7)),
+#'   "Multi-hue (advanced)"  = t(sapply(bprg,           sequential_hcl, n = 7)),
+#'   nrow = 5
+#' )
+#'
+#' ## swatches with color vision deficiency emulation
+#' swatchplot(sequential_hcl(7, "Viridis"), cvd = TRUE)
+#' swatchplot(
+#'   "YlGnBu"  = sequential_hcl(7, "YlGnBu"),
+#'   "Viridis" = sequential_hcl(7, "Viridis"),
+#'   cvd = c("deutan", "desaturate")
+#' )
+#' @export swatchplot
+#' @importFrom graphics rect mtext par plot
+swatchplot <- function(x, ..., nrow = 20, border = NULL, sborder = NULL, off = NULL,
+                       mar = NULL, line = NULL, cex = NULL, font = 1:2, cvd = FALSE)
+{
+  ## canonicalize specification to list of vectors/matrices
+  x <- if(missing(x)) {
+    list()
+  } else if(is.data.frame(x)) {
+    list(as.matrix(x))
+  } else if(is.matrix(x)) {
+    list(x)
+  } else if(!is.list(x)) {
+    list(x)
+  } else {
+    x
+  }
+  if(!missing(...)) {
+    x <- c(x, list(...))
+  }
+
+  if(!identical(cvd, FALSE)) {
+    if(identical(cvd, TRUE)) cvd <- c("deutan", "protan", "tritan", "desaturate")
+    for(i in seq_along(cvd)) {
+      cvd[i] <- match.arg(tolower(cvd[i]), c("deutan", "deuteranope", "protanope", "tritanope", "desaturated"))
+      if(cvd[i] == "deutan") cvd[i] <- "deuteranope"
+    }
+    substr(cvd, 1L, 1L) <- toupper(substr(cvd, 1L, 1L))
+    cvd <- c("Original", cvd)
+    cvd_trafo <- function(y) {
+      y <- as.character(y)
+      y <- rbind(
+        "Original"    = y,
+        "Deuteranope" = deutan(y),
+        "Protanope"   = protan(y),
+        "Tritanope"   = tritan(y),
+        "Desaturated" = desaturate(y)
+      )
+      y <- y[cvd, , drop = FALSE]
+    }
+    x <- lapply(x, cvd_trafo)
+  }
+
+  ## expand to maximum number of palettes
+  n <- max(sapply(x, function(y) {
+    if(is.null(dim(y))) length(y) else ncol(y)
+  }))
+  x <- lapply(x, function(y) {
+    if(!is.character(y)) y[] <- as.character(y)
+    if(is.null(dim(y))) y <- matrix(y, ncol = length(y))
+    if(NCOL(y) < n) {
+      y <- cbind(y, matrix("transparent", nrow = NROW(y), ncol = n - NCOL(y)))
+    }
+    if(is.null(rownames(y))) rownames(y) <- rep.int("", NROW(y))
+    colnames(y) <- paste("Color", 1L:n)
+    return(y)
+  })
+  ## add extra row for names (if any)
+  if(!is.null(names(x))) {
+    x <- lapply(names(x), function(i) {
+      if(nrow(x[[i]]) == 1L && rownames(x[[i]]) == "") {
+        rownames(x[[i]]) <- i
+        return(x[[i]])
+      } else {
+        rbind(
+          matrix(rep.int("transparent", n), nrow = 1L, ncol = n,
+                 dimnames = list(i, colnames(x[[i]]))),
+          x[[i]]
+        )
+      }
+    })
+  }
+
+  ## transform into one big matrix
+  x <- do.call("rbind", x)
+  x[is.na(x)] <- "transparent"
+  m <- nrow(x)
+
+  ## graphical parameters
+  rnam <- rownames(x)[x[,1L] != "transparent"]
+
+  if(is.null(cex)) cex <- if(m > 15L) 0.7 else 1
+  if(length(cex) < 2L) cex <- c(1, 1.4) * cex
+  mcex <- rep.int(cex[1L], m)
+  mcex[x[, 1L] == "transparent"] <- cex[2L]
+
+  mfont <- rep.int(font[1L], m)
+  mfont[x[, 1L] == "transparent"] <- font[2L]
+
+  lin <- if(is.null(line)) cex[1L] * (0.5 + max(nchar(rnam) - 1L)/2.25) else line
+  lin <- pmax(0.08, lin)
+
+  if(m > 1L) {
+    if(is.null(mar)) {
+      mar <- if(any(rnam != "")) {
+        c(0.1, 1.25 * lin, 0, 0)
+      } else {
+        c(0.1, 0.1, 0, 0)
+      }
+    }
+    nc <- ceiling(m/nrow)
+    nr <- ceiling(m/nc)
+    opar <- if(nc > 1L) par(mar = mar, mfrow = c(1L, nc)) else par(mar = mar)
+    on.exit(par(opar))
+  } else {
+    nc <- 1L
+    nr <- 1L
+  }
+  col <- rep_len(rep(1L:nc, each = nr), length.out = m)
+
+  if(is.null(off)) off <- if(n < 7L) 0.1 else 0
+  if(length(off) < 2L) off <- c(off, 0.3)
+  off <- c(1, 1) - off
+
+  ## swatch border color: light gray for sufficiently "discrete" case
+  if(is.null(border)) {
+    border <- if(n > 9L) "transparent" else "lightgray"
+  }
+  border <- rep.int(border, n * m)
+  border[x == "transparent"] <- "transparent"
+  border <- matrix(border, ncol = n)
+  ## palette border color: light gray for overall palette if off = 0 & border = "transparent"
+  if(is.null(sborder)) {
+    sborder <- ifelse(border[, 1L] == "transparent" & off[1L] >= 1, "lightgray", "transparent")
+  }
+  sborder <- rep.int(sborder, m)
+  sborder[apply(x == "transparent", 1, all)] <- "transparent"
+
+  ## visualization
+  for(i in 1L:nc) {
+    ## empty plot
+    plot(0, 0, type = "n", xlim = c(0, 1 - (1 - off[1L])/n), ylim = c(0, 1 - (1 - off[2L])/nr), axes = FALSE, xlab = "", ylab = "")
+    ## extract colors for i-th column
+    xi <- x[col == i, , drop = FALSE]
+    nri <- nrow(xi)
+    ## set up x- and y-coordinates for swatches
+    x1 <- rep(0:(n-1)/n, each = nri)
+    y1 <- rep.int((nr-1):(nr-nri)/nr, n)
+    ## annotation
+    mtext(rownames(xi), side = 2, at = y1[1L:nri] + 0.5 * off[2L]/nr,
+          las = 1, line = lin, adj = 0, cex = mcex[col == i], font = mfont[col == i])
+    ## draw swatches
+    rect(x1, y1, x1 + off[1L]/n, y1 + off[2L]/nr, col = xi, border = border[col == i])
+    ## draw palette borders
+    rect(0, y1[1L:nri], 1, y1[1L:nri] + off[2L]/nr, col = "transparent", border = sborder[(i - 1L) * nr + 1L:nri])
+  }
+
+  invisible(x)
+}
+
+## ## Perceptually-based color model
+## ## Hue: Type of color (H = 0, ..., 300, C = 60, L = 65)
+## sequential_hcl(5, h = c(0, 300), c = c(60, 60), l = 65)
+## ## Chroma: Colorfulness (H = 0, C = 0, ..., 100, L = 65)
+## sequential_hcl(5, h = 0, c = c(100, 0), l = 65, rev = TRUE, power = 1)
+## ## Luminance: Brightness (H = 260, C = 25, L = 25, ..., 90)
+## sequential_hcl(5, h = 260, c = c(25, 25), l = c(25, 90), rev = TRUE, power = 1)
+
+#' Color Spectrum Plot
+#'
+#' Visualization of color palettes (given as hex codes) in HCL and/or RGB
+#' coordinates.
+#'
+#' The function \code{specplot} transforms a given color palette in hex codes
+#' into their HCL (\code{\link[colorspace]{polarLUV}}) and/or RGB
+#' (\code{\link[colorspace]{sRGB}}) coordinates. As the hues for low-chroma
+#' colors are not (or poorly) identified, by default a smoothing is applied to
+#' the hues (\code{fix = TRUE}). Also, to avoid jumps from 0 to 360 or vice
+#' versa, the hue coordinates are shifted suitably.
+#'
+#' By default (\code{plot = TRUE}), the resulting HCL and optionally RGB coordinates are
+#' visualized by simple line plots along with the color palette \code{x}
+#' itself. The x-axis simply gives the ordering of the colors in the palette
+#' The y-axis depicts the following information: (1) Hue is drawn in red and
+#' coordinates are indicated on the axis on the right with range [0, 360] or
+#' (if necessary) [-360, 360]. (2) Chroma is drawn in green with coordinates on
+#' the left axis. The range [0, 100] is used unless the palette necessitates
+#' higher chroma values. (3) Luminance is drawn in blue with coordinates on the
+#' left axis in the range [0, 100]. Luminance (and hence also chroma) is on
+#' the left axis because it is arguably most important for understanding the
+#' type of palette (qualitative vs. sequential vs. diverging). To facilitate
+#' reading the legend the reversed order Luminance / Chroma / Hue is used so that
+#' the legend labels are closer to the axis they pertain to.
+#'
+#' For comparing two palettes, \code{specplot(x, y)} can be used which adds
+#' lines (dashed, by default) corresponding to the \code{y} palette HCL/RGB
+#' coordinates in the display.
+#'
+#' @param x character vector containing color hex codes.
+#' @param y optional second character vector containing further color hex codes,
+#' to be used for comparing two palettes (\code{x} vs. \code{y}).
+#' @param rgb logical or color specification. Should the RGB spectrum be
+#' visualized? Can also be a vector of three colors for the legend of R/G/B coordinates.
+#' @param hcl logical or color specification. Should the HCL spectrum be
+#' visualized? Can also be a vector of three colors for the legend of H/C/L coordinates.
+#' @param fix logical. Should the hues be fixed to be on a smooth(er) curve?
+#' For details see below.
+#' @param cex numeric. Character extension for figure axes and labels.
+#' @param type,lwd,lty,pch plotting parameters passed to
+#' \code{\link[graphics]{lines}} for drawing the RGB and HCL coordinates,
+#' respectively. Can be vectors of length 3.
+#' @param mar,oma numeric or logical. Either numeric vectors of length 4 giving
+#' the (outer) margins or a logical indicating whether \code{mar}/\code{oma}
+#' should be set.
+#' @param main character. Main title of the plot.
+#' @param legend logical. Should legends for the coordinates be plotted?
+#' @param palette logical. Should the given palette \code{x} be plotted?
+#' @param plot logical. Should the RGB and/or HCL coordinates be plotted?
+#' @param \dots currently not used.
+#' @return \code{specplot} invisibly returns a list with components
+#' \item{HCL}{a matrix of HCL coordinates,}
+#' \item{RGB}{a matrix of sRGB coordinates,}
+#' \item{hex}{original color palette \code{x}.}
+#' @author Reto Stauffer, Achim Zeileis
+#' @seealso \code{\link{hcl_palettes}}, \code{\link{hclplot}}
+#' @references Zeileis A, Hornik K, Murrell P (2009).  Escaping RGBland:
+#' Selecting Colors for Statistical Graphics.  \emph{Computational Statistics &
+#' Data Analysis}, \bold{53}, 3259--3270.
+#' \doi{10.1016/j.csda.2008.11.033}
+#' Preprint available from
+#' \url{https://www.zeileis.org/papers/Zeileis+Hornik+Murrell-2009.pdf}.
+#'
+#' Stauffer R, Mayr GJ, Dabernig M, Zeileis A (2015).  Somewhere over the
+#' Rainbow: How to Make Effective Use of Colors in Meteorological
+#' Visualizations.  \emph{Bulletin of the American Meteorological Society},
+#' \bold{96}(2), 203--216.
+#' \doi{10.1175/BAMS-D-13-00155.1}
+#'
+#' Zeileis A, Fisher JC, Hornik K, Ihaka R, McWhite CD, Murrell P, Stauffer R, Wilke CO (2020).
+#' \dQuote{colorspace: A Toolbox for Manipulating and Assessing Colors and Palettes.}
+#' \emph{Journal of Statistical Software}, \bold{96}(1), 1--49. \doi{10.18637/jss.v096.i01}
+#' @keywords hplot
+#' @examples
+#' ## spectrum of the (in)famous RGB rainbow palette (in both RGB and HCL)
+#' specplot(rainbow(100), rgb = TRUE)
+#'
+#' ## spectrum of HCL-based palettes: qualitative/sequential/diverging
+#' specplot(qualitative_hcl(100, "Set 2"))
+#' specplot(sequential_hcl(100, "Blues 2"))
+#' specplot(diverging_hcl(100, "Blue-Red"))
+#'
+#' ## return computed RGB and HCL coordinates
+#' res <- specplot(rainbow(10), plot = FALSE)
+#' print(res)
+#' @export specplot
+#' @importFrom graphics axis image layout legend lines mtext text par plot
+#' @importFrom stats median sd
+specplot <- function(x, y = NULL, rgb = FALSE, hcl = TRUE, fix = TRUE, cex = 1,
+                     type = "l", lwd = 2 * cex, lty = 1, pch = NULL, mar = NULL, oma = NULL,
+                     main = NULL, legend = TRUE, palette = TRUE, plot = TRUE, ...)
+{
+
+  # Replace NA x with white, required for hex2RGB.
+  # Store indizes of NA x to x.na for further
+  # processing.
+  x.na <- which(is.na(x))
+  if (length(x.na) > 0) x[x.na] <- "#ffffff"
+  RGB <- hex2RGB(x)
+  HCL <- as(RGB, "polarLUV")
+
+  # Replace coordinates of NA x with NA
+  RGB <- coords(RGB)
+  HCL <- coords(HCL)[, c("H", "C", "L")]
+  HCL[which(is.na(HCL), arr.ind = TRUE)] <- 0
+  if (length(x.na) > 0L) {
+    for (i in 1:3) {
+      HCL[x.na, i] <- NA
+      RGB[x.na, i] <- NA
+    }
+  }
+
+  # Fixing hue paths
+  if(fix & nrow(HCL) > 1L) {
+    # (1) as(RGB, "polarLUV") returns hue's in the
+    # range of 0-360. A palette from -100 to +100 results in
+    # c(260-360,0,100) - the iterative approach corrects this.
+
+    ## strategy:
+    ## change H by +360 or -360 if the hue trajectory has a very large jump,
+    ## (i.e., difference > +/- 300) or if the trajectory is essentially linear
+    ## but has a jump by +360 or -360 in additional to the "usual" difference
+    ## (i.e., median difference +/- 360)
+    md <- median(HCL[2L:nrow(HCL), "H"] - HCL[1L:(nrow(HCL) - 1L), "H"], na.rm = TRUE)
+    for(i in 2L:nrow(HCL)) {
+      if ( any(is.na(HCL[(i-1L):i,])) ) next
+      d <- HCL[i, "H"] - HCL[i - 1L, "H"]
+      if (abs(d) > 300 || (abs(d + 360 - md) < 4 || abs(d - 360 - md) < 4) ) HCL[i, "H"] <- HCL[i, "H"] - sign(d) * 360
+      if (abs(HCL[i, "H"]) >  360) HCL[1L:i, "H"] <- HCL[1L:i, "H"] - sign(HCL[i, "H"]) * 360
+    }
+
+    # (2) Smoothing hue values in batches where chroma is very low (ad hoc: < 8)
+    idx <- which(HCL[, "C"] < 8)
+    if (length(idx) == nrow(HCL)) {
+      HCL[, "H"] <- mean(HCL[, "H"], na.rm = TRUE)
+    } else if (length(idx) > 0L) {
+      # (a) pre-fixing hues where luminance is < 2 | > 98
+      ix <- split(1:nrow(HCL), HCL[,"L"] < 2 | HCL[,"L"] > 98)
+      if ( length(ix) == 2L ) {
+        fun_fix_H <- function(HCL, ix, i) HCL[which.min(abs(ix["FALSE"][[1L]] - i)), "H"]
+        HCL[ix["TRUE"][[1L]]] <- sapply(ix["TRUE"][[1L]], fun_fix_H, HCL = HCL, ix = ix)
+      }
+      ## (b) pre-smooth hue by rolling mean of length 3
+      n <- nrow(HCL)
+      if(n >= 49L) {
+        HCL[, "H"] <- rowMeans(cbind(
+          HCL[c(rep.int(1L, 2L), 1L:(n - 2L)), "H"],
+          HCL[c(rep.int(1L, 1L), 1L:(n - 1L)), "H"],
+          HCL[                   1L:n,         "H"]), na.rm = TRUE)
+        HCL[x.na, "H"] <- NA
+      }
+      ## (c) interpolate linearly or by natural spline
+
+      ## index list of consecutive segments with low-chroma colors
+      idxs <- split(idx, cumsum(c(1, diff(idx)) > 1))
+
+      ## find start "s" and end "e" for each consecutive segment
+      ## (= problematic low-chroma indexes plus adjacent ok-chroma indexes)
+      ## distinguish: one vs. more problematic segments
+      ## and: problems only at beginning or end vs. in the middle (diverging)
+      s <- 1L
+      while(length(idxs) > 0L) {
+        e <- if(any(s %in% idxs[[1L]])) {
+          if(length(idxs) > 1L) idxs[[2L]] - 1L else n
+        } else {
+          if(n %in% idxs[[1L]]) n else round(mean(range(idxs[[1L]])))
+        }
+        ## "in" vs. "out" of low-chroma in current segment
+        io <- split(min(s):max(e), (min(s):max(e) %in% idx) |  (min(s):max(e) %in% x.na))
+
+        ## given enough ok-chroma observations fit a curve
+        ## - either linear if residual standard error is small enough
+        ## - or natural spline
+        if (length(io) == 2L & sum(!is.na(HCL[io[["FALSE"]], "H"])) > 0 & length(io[["FALSE"]]) > 1) {
+          linfit <- stats::lm.fit(cbind(1, io[["FALSE"]]), HCL[io[["FALSE"]], "H"])
+          HCL[io[["TRUE"]], "H"] <- if(sd(linfit$residuals) < 1.3) {
+            drop(cbind(1, io[["TRUE"]]) %*% linfit$coefficients)
+          } else {
+            stats::spline(io[["FALSE"]], HCL[io[["FALSE"]], "H"],
+                          xout = io[["TRUE"]], method = "natural")$y
+          }
+          HCL[x.na, "H"] <- NA
+        }
+        idxs[[1L]] <- NULL
+        s <- e + 1L
+      }
+    }
+  }
+
+  # plot spectra and palette?
+  if(isTRUE(rgb)) rgb <- hex(sRGB(c(0.8, 0, 0), c(0, 0.8, 0), c(0, 0, 0.8)))
+  if(isTRUE(hcl)) hcl <- qualitative_hcl(3L)
+  show_rgb <- !identical(rgb, FALSE)
+  show_hcl <- !identical(hcl, FALSE)
+
+  if(plot & (length(x.na) == length(x))) {
+    opar <- par(no.readonly = TRUE)
+    nam <- names(par(xaxt = "n", yaxt = "n", bty = "n", mar = rep(0, 4)))
+    on.exit(par(opar[nam]))
+
+    plot(0, type = "n", xlim = c(-1, 1), ylim = c(-1, 1))
+    text(0, 0, "All colors NA\nCannot draw spectrum", col = 2)
+  } else if(plot) {
+    ## add second palette as a reference?
+    if(!is.null(y)) {
+      yspec <- specplot(y, rgb = rgb, hcl = hcl, fix = fix, plot = FALSE)
+      y <- TRUE
+    } else {
+      yspec <- NULL
+      y <- FALSE
+    }
+
+    ## set up graphical parameters and plot layout
+    nr <- show_rgb + palette + (palette && y) + show_hcl
+    opar <- par(no.readonly = TRUE)
+    if(identical(mar, FALSE)) opar$mar <- NULL
+    if(identical(oma, FALSE)) opar$oma <- NULL
+    if(nr < 2L) opar$mfrow <- opar$mfcol <- opar$mfg <- NULL
+    on.exit(par(opar))
+    if(nr > 1L) {
+      layout(matrix(1L:nr, ncol = 1L, nrow = nr),
+             heights = c(if(show_rgb) 10 else NULL, if(palette) 2 else NULL, if(palette && y) 2 else NULL, if(show_hcl) 10 else NULL))
+    }
+    par(xaxt = "n", xaxs = "i", yaxs = "i", cex = cex)
+    if(!identical(mar, FALSE)) {
+      if(is.null(mar) || isTRUE(mar)) mar <- c(0.2, 0, 0.2, 0)
+      par(mar = mar)
+    }
+    if(!identical(oma, FALSE)) {
+      if(is.null(oma) || isTRUE(oma)) oma <- c(2, 3, 2 + !is.null(main), 3)
+      par(oma = oma)
+    }
+
+    ## expand plotting parameters
+    rgb <- rep(rgb, length.out = 3L)
+    hcl <- rep(hcl, length.out = 3L)
+    lwd <- rep(lwd, length.out = 3L)
+    lty <- rep(lty, length.out = 3L)
+    type<- rep(type,length.out = 3L)
+    pch <- if(is.null(pch)) ifelse(type == "l", NA, 1) else rep(pch, length.out = 3L)
+
+    # RGB spectrum
+    if(show_rgb) {
+      plot(0, type = "n", ylim = c(0, 1), xlim = c(1, length(x)))
+      lines(RGB[, "R"], lwd = lwd[1L], lty = lty[1L], col = rgb[1L], type = type[1L], pch = pch[1L])
+      lines(RGB[, "G"], lwd = lwd[2L], lty = lty[2L], col = rgb[2L], type = type[1L], pch = pch[1L])
+      lines(RGB[, "B"], lwd = lwd[3L], lty = lty[3L], col = rgb[3L], type = type[1L], pch = pch[1L])
+      if(y) {
+        lines(yspec$RGB[, "R"], lwd = lwd[1L], lty = lty[1L] + 1L, col = rgb[1L], type = type[1L], pch = pch[1L])
+        lines(yspec$RGB[, "G"], lwd = lwd[2L], lty = lty[2L] + 1L, col = rgb[2L], type = type[1L], pch = pch[1L])
+        lines(yspec$RGB[, "B"], lwd = lwd[3L], lty = lty[3L] + 1L, col = rgb[3L], type = type[1L], pch = pch[1L])
+      }
+      if(legend) legend("topleft", legend = c("Red", "Green", "Blue"),
+                        ncol = 3L, bty = "n", lwd = lwd, lty = lty, col = rgb, pch = pch)
+      mtext(side = 3, "RGB Spectrum",       cex = cex, line = 0.2)
+      mtext(side = 2, "Red / Green / Blue", cex = cex, line = 2.0)
+      if(!is.null(main)) {
+        mtext(side = 3, main, line = 1.5, cex = 1.5 * cex)
+        main <- NULL
+      }
+    }
+
+    # color palette
+    if(palette) {
+      par(xaxt = "n", yaxt = "n")
+      image(matrix(seq_along(x), ncol = 1L), col = x)
+      par(yaxt = "s")
+      if(!is.null(main)) {
+        mtext(side = 3, main, line = 1.0, cex = 1.5 * cex)
+        main <- NULL
+      }
+    }
+    if(palette && y) {
+      par(xaxt = "n", yaxt = "n")
+      image(matrix(seq_along(yspec$hex), ncol = 1L), col = yspec$hex)
+      par(yaxt = "s")
+    }
+
+    # HCL spectrum
+    if(show_hcl) {
+      ymax <- pmax(max(HCL[, "C"], na.rm = TRUE) * 1.005, 100)
+      yrad <- 360/ymax
+      plot(0, type = "n", ylim = c(0, ymax), xlim = c(1, length(x)))
+      if ( min(HCL[,"H"], na.rm = TRUE) >= -1 ) {
+        labels <- seq(   0, 360, length.out = 5)
+        axis(side = 4, at = labels/yrad, labels = labels)
+        lines((HCL[, "H"])/yrad, lwd = lwd[1L], lty = lty[1L], col = hcl[1L], type = type[1L], pch = pch[1L])
+        if(y) lines((yspec$HCL[, "H"])/yrad, lwd = lwd[1L], lty = lty[1L] + 1L, col = hcl[1L], type = type[1L], pch = pch[1L])
+      } else {
+        labels <- seq(-360, 360, length.out = 5)
+        axis(side = 4, at = labels/(2 * yrad) + ymax/2, labels = labels)
+        lines((HCL[, "H"] + 360)/(2 * yrad), lwd = lwd[1L], lty = lty[1L], col = hcl[1L], type = type[1L], pch = pch[1L])
+        if(y) lines((yspec$HCL[, "H"] + 360)/(2 * yrad), lwd = lwd[1L], lty = lty[1L] + 1L, col = hcl[1L], type = type[1L], pch = pch[1L])
+      }
+      lines(HCL[, "C"], lwd = lwd[2L], lty = lty[2L], col = hcl[2L], type = type[1L], pch = pch[1L])
+      lines(HCL[, "L"], lwd = lwd[3L], lty = lty[3L], col = hcl[3L], type = type[1L], pch = pch[1L])
+      if(y) {
+        lines(yspec$HCL[, "C"], lwd = lwd[2L], lty = lty[2L] + 1L, col = hcl[2L], type = type[1L], pch = pch[1L])
+        lines(yspec$HCL[, "L"], lwd = lwd[3L], lty = lty[3L] + 1L, col = hcl[3L], type = type[1L], pch = pch[1L])
+      }
+      legend("bottomleft", legend = rev(c("Hue", "Chroma", "Luminance")),
+             ncol = 3L, bty = "n", lwd = rev(lwd), lty = rev(lty), col = rev(hcl), pch = rev(pch))
+      mtext(side = 1, "HCL Spectrum",    cex = cex, line = 0.2)
+      mtext(side = 2, "Luminance / Chroma", cex = cex, line = 2.0)
+      mtext(side = 4, "Hue",       cex = cex, line = 2.0)
+      if(!is.null(main)) mtext(side = 3, main, line = 1.0, cex = 1.5 * cex)
+    }
+
+  }
+
+  # Return
+  if ( length(x.na) > 0 ) x[x.na] <- NA
+  invisible(list(
+    HCL = HCL,
+    RGB = RGB,
+    hex = x)
+  )
+}
+
+
+# Function for printing palette
+
+#' @export
+#' @importFrom grDevices rgb
+#' @importFrom graphics rect par image text
+
+print.palette <- function(x, ...) {
+  n <- length(x)
+  old <- par(mar = c(0.5, 0.5, 0.5, 0.5))
+  on.exit(par(old))
+
+  image(1:n, 1, as.matrix(1:n), col = x,
+        ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+
+  rect(0, 0.92, n + 1, 1.08, col = rgb(1, 1, 1, 0.8), border = NA)
+  text((n + 1) / 2, 1, labels = attr(x, "name"), cex = 2.5, family = "serif")
+}
+
+#' view color ramps in a palette preview
+#'
+#' @description
+#' This will create a plot of a color ramp
+#'
+#' @param col the color palette to be visualised
+#' @param border color of the segment borders. Defaults to "transparent"
+#' @param name an optional name to be put into the plot
+#'
+#' @author
+#' Tim Appelhans
+#'
+#' @examples
+#' library(colorspace)
+#' library(viridisLite)
+#'
+#' clrs <- list(rainbow = rainbow(100),
+#'              rainbow_grey = desaturate(rainbow(100)),
+#'              viridis = viridis(100),
+#'              viridis_grey = desaturate(viridis(100)),
+#'              inferno = inferno(100),
+#'              inferno_grey = desaturate(inferno(100)),
+#'              magma = magma(100),
+#'              magma_grey = desaturate(magma(100)))
+#'
+#' out <- lapply(seq(clrs), function(i) {
+#'   viewPalette(clrs[[i]], name = names(clrs)[i])
+#' })
+#'
+#' Orcs::latticeCombineGrid(out)
+#'
+#' @export viewPalette
+#' @aliases viewPalette
+
+viewPalette <- function(col, border = "transparent", name = "") {
+
+  n <- length(col)
+  mat <- matrix(1:n, nrow = n)
+  lattice::levelplot(mat, col.regions = col, scales = list(draw = FALSE),
+                     ylab = "", xlab = "", colorkey = FALSE,
+                     at = lattice::do.breaks(c(1, n), nint = n), asp = 0.2,
+                     panel = function(...) {
+                       lattice::panel.levelplot(...)
+                       grid::grid.text(label = name, x = 0.9, y = 0.9,
+                                       just = c("right", "top"))
+                     })
+}
+
+
+#' @export
+#' @importFrom graphics rect par image text
+#' @importFrom grDevices rgb
+print.palette <- function(x, ...) {
+  n <- length(x)
+  old <- par(mar = c(0.5, 0.5, 0.5, 0.5))
+  on.exit(par(old))
+
+  image(1:n, 1, as.matrix(1:n), col = x,
+        ylab = "", xaxt = "n", yaxt = "n", bty = "n")
+
+  rect(0, 0.9, n + 1, 1.1, col = rgb(1, 1, 1, 0.8), border = NA)
+  text((n + 1) / 2, 1, labels = attr(x, "name"), cex = 1, family = "serif")
+}
+

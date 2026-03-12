@@ -1,0 +1,1006 @@
+### transfer matrixes
+
+# https://developer.mozilla.org/en-US/docs/Web/Accessibility/Understanding_Colors_and_Luminance
+
+#
+#
+# https://ciechanow.ski/color-spaces/
+#
+# https://www.mathworks.com/help/images/understanding-color-spaces-and-color-space-conversion.html
+#
+#
+
+# RGB Working Space	Reference White	RGB to XYZ [M]	XYZ to RGB [M]-1
+# Adobe RGB (1998)	D65
+# 0.5767309  0.1855540  0.1881852
+# 0.2973769  0.6273491  0.0752741
+# 0.0270343  0.0706872  0.9911085
+# 2.0413690 -0.5649464 -0.3446944
+# -0.9692660  1.8760108  0.0415560
+# 0.0134474 -0.1183897  1.0154096
+# AppleRGB	D65
+# 0.4497288  0.3162486  0.1844926
+# 0.2446525  0.6720283  0.0833192
+# 0.0251848  0.1411824  0.9224628
+# 2.9515373 -1.2894116 -0.4738445
+# -1.0851093  1.9908566  0.0372026
+# 0.0854934 -0.2694964  1.0912975
+# Best RGB	D50
+# 0.6326696  0.2045558  0.1269946
+# 0.2284569  0.7373523  0.0341908
+# 0.0000000  0.0095142  0.8156958
+# 1.7552599 -0.4836786 -0.2530000
+# -0.5441336  1.5068789  0.0215528
+# 0.0063467 -0.0175761  1.2256959
+# Beta RGB	D50
+# 0.6712537  0.1745834  0.1183829
+# 0.3032726  0.6637861  0.0329413
+# 0.0000000  0.0407010  0.7845090
+# 1.6832270 -0.4282363 -0.2360185
+# -0.7710229  1.7065571  0.0446900
+# 0.0400013 -0.0885376  1.2723640
+# Bruce RGB	D65
+# 0.4674162  0.2944512  0.1886026
+# 0.2410115  0.6835475  0.0754410
+# 0.0219101  0.0736128  0.9933071
+# 2.7454669 -1.1358136 -0.4350269
+# -0.9692660  1.8760108  0.0415560
+# 0.0112723 -0.1139754  1.0132541
+# CIE RGB	E
+# 0.4887180  0.3106803  0.2006017
+# 0.1762044  0.8129847  0.0108109
+# 0.0000000  0.0102048  0.9897952
+# 2.3706743 -0.9000405 -0.4706338
+# -0.5138850  1.4253036  0.0885814
+# 0.0052982 -0.0146949  1.0093968
+# ColorMatch RGB	D50
+# 0.5093439  0.3209071  0.1339691
+# 0.2748840  0.6581315  0.0669845
+# 0.0242545  0.1087821  0.6921735
+# 2.6422874 -1.2234270 -0.3930143
+# -1.1119763  2.0590183  0.0159614
+# 0.0821699 -0.2807254  1.4559877
+# Don RGB 4	D50
+# 0.6457711  0.1933511  0.1250978
+# 0.2783496  0.6879702  0.0336802
+# 0.0037113  0.0179861  0.8035125
+# 1.7603902 -0.4881198 -0.2536126
+# -0.7126288  1.6527432  0.0416715
+# 0.0078207 -0.0347411  1.2447743
+# ECI RGB	D50
+# 0.6502043  0.1780774  0.1359384
+# 0.3202499  0.6020711  0.0776791
+# 0.0000000  0.0678390  0.7573710
+# 1.7827618 -0.4969847 -0.2690101
+# -0.9593623  1.9477962 -0.0275807
+# 0.0859317 -0.1744674  1.3228273
+# Ekta Space PS5	D50
+# 0.5938914  0.2729801  0.0973485
+# 0.2606286  0.7349465  0.0044249
+# 0.0000000  0.0419969  0.7832131
+# 2.0043819 -0.7304844 -0.2450052
+# -0.7110285  1.6202126  0.0792227
+# 0.0381263 -0.0868780  1.2725438
+# NTSC RGB	C
+# 0.6068909  0.1735011  0.2003480
+# 0.2989164  0.5865990  0.1144845
+# 0.0000000  0.0660957  1.1162243
+# 1.9099961 -0.5324542 -0.2882091
+# -0.9846663  1.9991710 -0.0283082
+# 0.0583056 -0.1183781  0.8975535
+# PAL/SECAM RGB	D65
+# 0.4306190  0.3415419  0.1783091
+# 0.2220379  0.7066384  0.0713236
+# 0.0201853  0.1295504  0.9390944
+# 3.0628971 -1.3931791 -0.4757517
+# -0.9692660  1.8760108  0.0415560
+# 0.0678775 -0.2288548  1.0693490
+# ProPhoto RGB	D50
+# 0.7976749  0.1351917  0.0313534
+# 0.2880402  0.7118741  0.0000857
+# 0.0000000  0.0000000  0.8252100
+# 1.3459433 -0.2556075 -0.0511118
+# -0.5445989  1.5081673  0.0205351
+# 0.0000000  0.0000000  1.2118128
+# SMPTE-C RGB	D65
+# 0.3935891  0.3652497  0.1916313
+# 0.2124132  0.7010437  0.0865432
+# 0.0187423  0.1119313  0.9581563
+# 3.5053960 -1.7394894 -0.5439640
+# -1.0690722  1.9778245  0.0351722
+# 0.0563200 -0.1970226  1.0502026
+# sRGB	D65
+# 0.4124564  0.3575761  0.1804375
+# 0.2126729  0.7151522  0.0721750
+# 0.0193339  0.1191920  0.9503041
+# 3.2404542 -1.5371385 -0.4985314
+# -0.9692660  1.8760108  0.0415560
+# 0.0556434 -0.2040259  1.0572252
+# Wide Gamut RGB	D50
+# 0.7161046  0.1009296  0.1471858
+# 0.2581874  0.7249378  0.0168748
+# 0.0000000  0.0517813  0.7734287
+# 1.4628067 -0.1840623 -0.2743606
+# -0.5217933  1.4472381  0.0677227
+# 0.0349342 -0.0968930  1.2884099
+
+# Name	Gamma	Reference
+# White	Red Primary	Green Primary	Blue Primary	Volume
+# (ΔE3)	Lab Gamut
+# Efficiency %	Coding
+# Efficiency %
+# x	y	Y	x	y	Y	x	y	Y
+# Lab Gamut	-	D50	-	-	-	-	-	-	-	-	-	2,381,085	97.0	35.1
+# Adobe RGB (1998)	2.2	D65	0.6400	0.3300	0.297361	0.2100	0.7100	0.627355	0.1500	0.0600	0.075285	1,208,631	50.6	100.0
+# Apple RGB	1.8	D65	0.6250	0.3400	0.244634	0.2800	0.5950	0.672034	0.1550	0.0700	0.083332	798,403	33.5	100.0
+# Best RGB	2.2	D50	0.7347	0.2653	0.228457	0.2150	0.7750	0.737352	0.1300	0.0350	0.034191	2,050,725	77.6	96.5
+# Beta RGB	2.2	D50	0.6888	0.3112	0.303273	0.1986	0.7551	0.663786	0.1265	0.0352	0.032941	1,717,450	69.3	99.0
+# Bruce RGB	2.2	D65	0.6400	0.3300	0.240995	0.2800	0.6500	0.683554	0.1500	0.0600	0.075452	988,939	41.5	100.0
+# CIE RGB	2.2	E	0.7350	0.2650	0.176204	0.2740	0.7170	0.812985	0.1670	0.0090	0.010811	1,725,261	64.3	96.1
+# ColorMatch RGB	1.8	D50	0.6300	0.3400	0.274884	0.2950	0.6050	0.658132	0.1500	0.0750	0.066985	836,975	35.2	100.0
+# Don RGB 4	2.2	D50	0.6960	0.3000	0.278350	0.2150	0.7650	0.687970	0.1300	0.0350	0.033680	1,802,358	72.1	98.8
+# ECI RGB v2	L*	D50	0.6700	0.3300	0.320250	0.2100	0.7100	0.602071	0.1400	0.0800	0.077679	1,331,362	55.3	99.7
+# Ekta Space PS5	2.2	D50	0.6950	0.3050	0.260629	0.2600	0.7000	0.734946	0.1100	0.0050	0.004425	1,623,899	65.7	99.5
+# NTSC RGB	2.2	C	0.6700	0.3300	0.298839	0.2100	0.7100	0.586811	0.1400	0.0800	0.114350	1,300,252	54.2	99.9
+# PAL/SECAM RGB	2.2	D65	0.6400	0.3300	0.222021	0.2900	0.6000	0.706645	0.1500	0.0600	0.071334	849,831	35.7	100.0
+# ProPhoto RGB	1.8	D50	0.7347	0.2653	0.288040	0.1596	0.8404	0.711874	0.0366	0.0001	0.000086	2,879,568	91.2	87.3
+# SMPTE-C RGB	2.2	D65	0.6300	0.3400	0.212395	0.3100	0.5950	0.701049	0.1550	0.0700	0.086556	758,857	31.9	100.0
+# sRGB	≈2.2	D65	0.6400	0.3300	0.212656	0.3000	0.6000	0.715158	0.1500	0.0600	0.072186	832,870	35.0	100.0
+# Wide Gamut RGB	2.2	D50	0.7350	0.2650	0.258187	0.1150	0.8260	0.724938	0.1570	0.0180	0.016875	2,164,221	77.6	91.9
+
+
+# //X, Y and Z input refer to a D65/2° standard illuminant.
+# //sR, sG and sB (standard RGB) output range = 0 ÷ 255
+#
+# var_X = X / 100
+# var_Y = Y / 100
+# var_Z = Z / 100
+#
+# var_R = var_X *  3.2406 + var_Y * -1.5372 + var_Z * -0.4986
+# var_G = var_X * -0.9689 + var_Y *  1.8758 + var_Z *  0.0415
+# var_B = var_X *  0.0557 + var_Y * -0.2040 + var_Z *  1.0570
+#
+# if ( var_R > 0.0031308 ) var_R = 1.055 * ( var_R ^ ( 1 / 2.4 ) ) - 0.055
+# else                     var_R = 12.92 * var_R
+# if ( var_G > 0.0031308 ) var_G = 1.055 * ( var_G ^ ( 1 / 2.4 ) ) - 0.055
+# else                     var_G = 12.92 * var_G
+# if ( var_B > 0.0031308 ) var_B = 1.055 * ( var_B ^ ( 1 / 2.4 ) ) - 0.055
+# else                     var_B = 12.92 * var_B
+#
+# sR = var_R * 255
+# sG = var_G * 255
+# sB = var_B * 255
+#
+# //sR, sG and sB (Standard RGB) input range = 0 ÷ 255
+# //X, Y and Z output refer to a D65/2° standard illuminant.
+#
+# var_R = ( sR / 255 )
+# var_G = ( sG / 255 )
+# var_B = ( sB / 255 )
+#
+# if ( var_R > 0.04045 ) var_R = ( ( var_R + 0.055 ) / 1.055 ) ^ 2.4
+# else                   var_R = var_R / 12.92
+# if ( var_G > 0.04045 ) var_G = ( ( var_G + 0.055 ) / 1.055 ) ^ 2.4
+# else                   var_G = var_G / 12.92
+# if ( var_B > 0.04045 ) var_B = ( ( var_B + 0.055 ) / 1.055 ) ^ 2.4
+# else                   var_B = var_B / 12.92
+#
+# var_R = var_R * 100
+# var_G = var_G * 100
+# var_B = var_B * 100
+#
+# X = var_R * 0.4124 + var_G * 0.3576 + var_B * 0.1805
+# Y = var_R * 0.2126 + var_G * 0.7152 + var_B * 0.0722
+# Z = var_R * 0.0193 + var_G * 0.1192 + var_B * 0.9505
+#
+# //X, Y and Z input refer to a D65/2° standard illuminant.
+# //aR, aG and aB (RGB Adobe 1998) output range = 0 ÷ 255
+#
+# var_X = X / 100
+# var_Y = Y / 100
+# var_Z = Z / 100
+#
+# var_R = var_X *  2.04137 + var_Y * -0.56495 + var_Z * -0.34469
+# var_G = var_X * -0.96927 + var_Y *  1.87601 + var_Z *  0.04156
+# var_B = var_X *  0.01345 + var_Y * -0.11839 + var_Z *  1.01541
+#
+# var_R = var_R ^ ( 1 / 2.19921875 )
+# var_G = var_G ^ ( 1 / 2.19921875 )
+# var_B = var_B ^ ( 1 / 2.19921875 )
+#
+# aR = var_R * 255
+# aG = var_G * 255
+# aB = var_B * 255
+#
+# //aR, aG and aB (RGB Adobe 1998) input range = 0 ÷ 255
+# //X, Y and Z output refer to a D65/2° standard illuminant.
+#
+# var_R = ( aR / 255 )
+# var_G = ( aG / 255 )
+# var_B = ( aB / 255 )
+#
+# var_R = var_R ^ 2.19921875
+# var_G = var_G ^ 2.19921875
+# var_B = var_B ^ 2.19921875
+#
+# var_R = var_R * 100
+# var_G = var_G * 100
+# var_B = var_B * 100
+#
+# X = var_R * 0.57667 + var_G * 0.18555 + var_B * 0.18819
+# Y = var_R * 0.29738 + var_G * 0.62735 + var_B * 0.07527
+# Z = var_R * 0.02703 + var_G * 0.07069 + var_B * 0.99110
+#
+# Y = Y
+# x = X / ( X + Y + Z )
+# y = Y / ( X + Y + Z )
+#
+# X = x * ( Y / y )
+# Y = Y
+# Z = ( 1 - x - y ) * ( Y / y )
+#
+# //Reference-X, Y and Z refer to specific illuminants and observers.
+# //Common reference values are available below in this same page.
+#
+# var_Ka = ( 175.0 / 198.04 ) * ( Reference-Y + Reference-X )
+# var_Kb = (  70.0 / 218.11 ) * ( Reference-Y + Reference-Z )
+#
+# Hunter-L = 100.0 * sqrt( Y / Reference-Y )
+# Hunter-a = var_Ka * ( ( ( X / Reference-X ) - ( Y / Reference-Y ) ) / sqrt( Y / Reference-Y ) )
+# Hunter-b = var_Kb * ( ( ( Y / Reference-Y ) - ( Z / Reference-Z ) ) / sqrt( Y / Reference-Y ) )
+#
+# //Reference-X, Y and Z refer to specific illuminants and observers.
+# //Common reference values are available below in this same page.
+#
+# var_Ka = ( 175.0 / 198.04 ) * ( Reference-Y + Reference-X )
+# var_Kb = (  70.0 / 218.11 ) * ( Reference-Y + Reference-Z )
+#
+# Y = ( ( Hunter-L / Reference-Y ) ^ 2 ) * 100.0
+# X =   ( Hunter-a / var_Ka * sqrt( Y / Reference-Y ) + ( Y / Reference-Y ) ) * Reference-X
+# Z = - ( Hunter-b / var_Kb * sqrt( Y / Reference-Y ) - ( Y / Reference-Y ) ) * Reference-Z
+#
+# //Reference-X, Y and Z refer to specific illuminants and observers.
+# //Common reference values are available below in this same page.
+#
+# var_X = X / Reference-X
+# var_Y = Y / Reference-Y
+# var_Z = Z / Reference-Z
+#
+# if ( var_X > 0.008856 ) var_X = var_X ^ ( 1/3 )
+# else                    var_X = ( 7.787 * var_X ) + ( 16 / 116 )
+# if ( var_Y > 0.008856 ) var_Y = var_Y ^ ( 1/3 )
+# else                    var_Y = ( 7.787 * var_Y ) + ( 16 / 116 )
+# if ( var_Z > 0.008856 ) var_Z = var_Z ^ ( 1/3 )
+# else                    var_Z = ( 7.787 * var_Z ) + ( 16 / 116 )
+#
+# CIE-L* = ( 116 * var_Y ) - 16
+# CIE-a* = 500 * ( var_X - var_Y )
+# CIE-b* = 200 * ( var_Y - var_Z )
+#
+# //Reference-X, Y and Z refer to specific illuminants and observers.
+# //Common reference values are available below in this same page.
+#
+# var_Y = ( CIE-L* + 16 ) / 116
+# var_X = CIE-a* / 500 + var_Y
+# var_Z = var_Y - CIE-b* / 200
+#
+# if ( var_Y^3  > 0.008856 ) var_Y = var_Y^3
+# else                       var_Y = ( var_Y - 16 / 116 ) / 7.787
+# if ( var_X^3  > 0.008856 ) var_X = var_X^3
+# else                       var_X = ( var_X - 16 / 116 ) / 7.787
+# if ( var_Z^3  > 0.008856 ) var_Z = var_Z^3
+# else                       var_Z = ( var_Z - 16 / 116 ) / 7.787
+#
+# X = var_X * Reference-X
+# Y = var_Y * Reference-Y
+# Z = var_Z * Reference-Z
+#
+# var_H = arc_tangent( CIE-b*, CIE-a* )  //Quadrant by signs
+#
+# if ( var_H > 0 ) var_H = ( var_H / PI ) * 180
+# else             var_H = 360 - ( abs( var_H ) / PI ) * 180
+#
+# CIE-L* = CIE-L*
+#   CIE-C* = sqrt( CIE-a* ^ 2 + CIE-b* ^ 2 )
+# CIE-H° = var_H
+#
+# //CIE-H° range = 0 ÷ 360°
+#
+# CIE-L* = CIE-L*
+#   CIE-a* = cos( degree_2_radian( CIE-H° ) ) * CIE-C*
+#   CIE-b* = sin( degree_2_radian( CIE-H° ) ) * CIE-C*
+#
+#   //Reference-X, Y and Z refer to specific illuminants and observers.
+# //Common reference values are available below in this same page.
+#
+# var_U = ( 4 * X ) / ( X + ( 15 * Y ) + ( 3 * Z ) )
+# var_V = ( 9 * Y ) / ( X + ( 15 * Y ) + ( 3 * Z ) )
+#
+# var_Y = Y / 100
+# if ( var_Y > 0.008856 ) var_Y = var_Y ^ ( 1/3 )
+# else                    var_Y = ( 7.787 * var_Y ) + ( 16 / 116 )
+#
+# ref_U = ( 4 * Reference-X ) / ( Reference-X + ( 15 * Reference-Y ) + ( 3 * Reference-Z ) )
+# ref_V = ( 9 * Reference-Y ) / ( Reference-X + ( 15 * Reference-Y ) + ( 3 * Reference-Z ) )
+#
+# CIE-L* = ( 116 * var_Y ) - 16
+# CIE-u* = 13 * CIE-L* * ( var_U - ref_U )
+# CIE-v* = 13 * CIE-L* * ( var_V - ref_V )
+#
+# //Reference-X, Y and Z refer to specific illuminants and observers.
+# //Common reference values are available below in this same page.
+#
+# var_Y = ( CIE-L* + 16 ) /116
+# if ( var_Y^3  > 0.008856 ) var_Y = var_Y^3
+# else                       var_Y = ( var_Y - 16 / 116 ) / 7.787
+#
+# ref_U = ( 4 * Reference-X ) / ( Reference-X + ( 15 * Reference-Y ) + ( 3 * Reference-Z ) )
+# ref_V = ( 9 * Reference-Y ) / ( Reference-X + ( 15 * Reference-Y ) + ( 3 * Reference-Z ) )
+#
+# var_U = CIE-u* / ( 13 * CIE-L* ) + ref_U
+# var_V = CIE-v* / ( 13 * CIE-L* ) + ref_V
+#
+# Y = var_Y * 100
+# X =  - ( 9 * Y * var_U ) / ( ( var_U - 4 ) * var_V - var_U * var_V )
+# Z = ( 9 * Y - ( 15 * var_V * Y ) - ( var_V * X ) ) / ( 3 * var_V )
+
+# Observer	2° (CIE 1931)	10° (CIE 1964)	Note
+# Illuminant	X2	Y2	Z2	X10	Y10	Z10
+# A	109.850	100.000	35.585	111.144	100.000	35.200	Incandescent/tungsten
+# B	99.0927	100.000	85.313	99.178;	100.000	84.3493	Old direct sunlight at noon
+# C	98.074	100.000	118.232	97.285	100.000	116.145	Old daylight
+# D50	96.422	100.000	82.521	96.720	100.000	81.427	ICC profile PCS
+# D55	95.682	100.000	92.149	95.799	100.000	90.926	Mid-morning daylight
+# D65	95.047	100.000	108.883	94.811	100.000	107.304	Daylight, sRGB, Adobe-RGB
+# D75	94.972	100.000	122.638	94.416	100.000	120.641	North sky daylight
+# E	100.000	100.000	100.000	100.000	100.000	100.000	Equal energy
+# F1	92.834	100.000	103.665	94.791	100.000	103.191	Daylight Fluorescent
+# F2	99.187	100.000	67.395	103.280	100.000	69.026	Cool fluorescent
+# F3	103.754	100.000	49.861	108.968	100.000	51.965	White Fluorescent
+# F4	109.147	100.000	38.813	114.961	100.000	40.963	Warm White Fluorescent
+# F5	90.872	100.000	98.723	93.369	100.000	98.636	Daylight Fluorescent
+# F6	97.309	100.000	60.191	102.148	100.000	62.074	Lite White Fluorescent
+# F7	95.044	100.000	108.755	95.792	100.000	107.687	Daylight fluorescent, D65 simulator
+# F8	96.413	100.000	82.333	97.115	100.000	81.135	Sylvania F40, D50 simulator
+# F9	100.365	100.000	67.868	102.116	100.000	67.826	Cool White Fluorescent
+# F10	96.174	100.000	81.712	99.001	100.000	83.134	Ultralume 50, Philips TL85
+# F11	100.966	100.000	64.370	103.866	100.000	65.627	Ultralume 40, Philips TL84
+# F12	108.046	100.000	39.228	111.428	100.000	40.353	Ultralume 30, Philips TL83
+
+# function lin_P3_to_XYZ(rgb) {
+#   // convert an array of linear-light display-p3 values to CIE XYZ
+#   // using  D65 (no chromatic adaptation)
+#   // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+#   var M = [
+#     [0.4865709486482162, 0.26566769316909306, 0.1982172852343625],
+#     [0.2289745640697488, 0.6917385218365064,  0.079286914093745],
+#     [0.0000000000000000, 0.04511338185890264, 1.043944368900976]
+#   ];
+#   // 0 was computed as -3.972075516933488e-17
+#
+#   return multiplyMatrices(M, rgb);
+# }
+#
+# function XYZ_to_lin_P3(XYZ) {
+#   // convert XYZ to linear-light P3
+#   var M = [
+#     [ 2.493496911941425,   -0.9313836179191239, -0.40271078445071684],
+#     [-0.8294889695615747,   1.7626640603183463,  0.023624685841943577],
+#     [ 0.03584583024378447, -0.07617238926804182, 0.9568845240076872]
+#   ];
+#
+#   return multiplyMatrices(M, XYZ);
+# }
+#
+# function lin_ProPhoto_to_XYZ(rgb) {
+#   // convert an array of linear-light prophoto-rgb values to CIE XYZ
+#   // using  D50 (so no chromatic adaptation needed afterwards)
+#   // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+#   var M = [
+#     [ 0.7977604896723027,  0.13518583717574031,  0.0313493495815248     ],
+#     [ 0.2880711282292934,  0.7118432178101014,   0.00008565396060525902 ],
+#     [ 0.0,                 0.0,                  0.8251046025104601     ]
+#   ];
+#
+#   return multiplyMatrices(M, rgb);
+# }
+#
+# function XYZ_to_lin_ProPhoto(XYZ) {
+#   // convert XYZ to linear-light prophoto-rgb
+#   var M = [
+#     [  1.3457989731028281,  -0.25558010007997534,  -0.05110628506753401 ],
+#     [ -0.5446224939028347,   1.5082327413132781,    0.02053603239147973 ],
+#     [  0.0,                  0.0,                   1.2119675456389454  ]
+#   ];
+#
+#   return multiplyMatrices(M, XYZ);
+# }
+#
+# function lin_a98rgb_to_XYZ(rgb) {
+#   // convert an array of linear-light a98-rgb values to CIE XYZ
+#   // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+#   // has greater numerical precision than section 4.3.5.3 of
+#   // https://www.adobe.com/digitalimag/pdfs/AdobeRGB1998.pdf
+#   // but the values below were calculated from first principles
+#   // from the chromaticity coordinates of R G B W
+#   // see matrixmaker.html
+#   var M = [
+#     [ 0.5766690429101305,   0.1855582379065463,   0.1882286462349947  ],
+#     [ 0.29734497525053605,  0.6273635662554661,   0.07529145849399788 ],
+#     [ 0.02703136138641234,  0.07068885253582723,  0.9913375368376388  ]
+#   ];
+#
+#   return multiplyMatrices(M, rgb);
+# }
+#
+# function XYZ_to_lin_a98rgb(XYZ) {
+#   // convert XYZ to linear-light a98-rgb
+#   var M = [
+#     [  2.0415879038107465,    -0.5650069742788596,   -0.34473135077832956 ],
+#     [ -0.9692436362808795,     1.8759675015077202,    0.04155505740717557 ],
+#     [  0.013444280632031142,  -0.11836239223101838,   1.0151749943912054  ]
+#   ];
+#
+#   return multiplyMatrices(M, XYZ);
+# }
+#
+# function lin_2020_to_XYZ(rgb) {
+#   // convert an array of linear-light rec2020 values to CIE XYZ
+#   // using  D65 (no chromatic adaptation)
+#   // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+#   var M = [
+#     [0.6369580483012914, 0.14461690358620832,  0.1688809751641721],
+#     [0.2627002120112671, 0.6779980715188708,   0.05930171646986196],
+#     [0.000000000000000,  0.028072693049087428, 1.060985057710791]
+#   ];
+#   // 0 is actually calculated as  4.994106574466076e-17
+#
+#   return multiplyMatrices(M, rgb);
+# }
+#
+# function XYZ_to_lin_2020(XYZ) {
+#   // convert XYZ to linear-light rec2020
+#   var M = [
+#     [1.7166511879712674,   -0.35567078377639233, -0.25336628137365974],
+#     [-0.6666843518324892,   1.6164812366349395,   0.01576854581391113],
+#     [0.017639857445310783, -0.042770613257808524, 0.9421031212354738]
+#   ];
+#
+#   return multiplyMatrices(M, XYZ);
+# }
+#
+# function D65_to_D50(XYZ) {
+#   // Bradford chromatic adaptation from D65 to D50
+#   // The matrix below is the result of three operations:
+#     // - convert from XYZ to retinal cone domain
+#   // - scale components from one reference white to another
+#   // - convert back to XYZ
+#   // http://www.brucelindbloom.com/index.html?Eqn_ChromAdapt.html
+#   var M =  [
+#     [  1.0479298208405488,    0.022946793341019088,  -0.05019222954313557 ],
+#     [  0.029627815688159344,  0.990434484573249,     -0.01707382502938514 ],
+#     [ -0.009243058152591178,  0.015055144896577895,   0.7518742899580008  ]
+#   ];
+#
+#   return multiplyMatrices(M, XYZ);
+# }
+#
+# function D50_to_D65(XYZ) {
+#   // Bradford chromatic adaptation from D50 to D65
+#   var M = [
+#     [  0.9554734527042182,   -0.023098536874261423,  0.0632593086610217   ],
+#     [ -0.028369706963208136,  1.0099954580058226,    0.021041398966943008 ],
+#     [  0.012314001688319899, -0.020507696433477912,  1.3303659366080753   ]
+#   ];
+#
+#   return multiplyMatrices(M, XYZ);
+# }
+#
+# // CIE Lab and LCH
+#
+# function XYZ_to_Lab(XYZ) {
+#   // Assuming XYZ is relative to D50, convert to CIE Lab
+#   // from CIE standard, which now defines these as a rational fraction
+#   var ε = 216/24389;  // 6^3/29^3
+#   var κ = 24389/27;   // 29^3/3^3
+#
+#   // compute xyz, which is XYZ scaled relative to reference white
+#   var xyz = XYZ.map((value, i) => value / D50[i]);
+#
+#   // now compute f
+#   var f = xyz.map(value => value > ε ? Math.cbrt(value) : (κ * value + 16)/116);
+#
+#   return [
+#     (116 * f[1]) - 16, 	 // L
+#     500 * (f[0] - f[1]), // a
+#     200 * (f[1] - f[2])  // b
+#   ];
+#   // L in range [0,100]. For use in CSS, add a percent
+# }
+#
+# function Lab_to_XYZ(Lab) {
+#   // Convert Lab to D50-adapted XYZ
+#   // http://www.brucelindbloom.com/index.html?Eqn_RGB_XYZ_Matrix.html
+#   var κ = 24389/27;   // 29^3/3^3
+#   var ε = 216/24389;  // 6^3/29^3
+#   var f = [];
+#
+#   // compute f, starting with the luminance-related term
+#   f[1] = (Lab[0] + 16)/116;
+#   f[0] = Lab[1]/500 + f[1];
+#   f[2] = f[1] - Lab[2]/200;
+#
+#   // compute xyz
+#   var xyz = [
+#     Math.pow(f[0],3) > ε ?   Math.pow(f[0],3)            : (116*f[0]-16)/κ,
+#     Lab[0] > κ * ε ?         Math.pow((Lab[0]+16)/116,3) : Lab[0]/κ,
+#     Math.pow(f[2],3)  > ε ?  Math.pow(f[2],3)            : (116*f[2]-16)/κ
+#   ];
+#
+#   // Compute XYZ by scaling xyz by reference white
+#   return xyz.map((value, i) => value * D50[i]);
+# }
+#
+# // OKLab and OKLCH
+# // https://bottosson.github.io/posts/oklab/
+#
+#   // XYZ <-> LMS matrices recalculated for consistent reference white
+#   // see https://github.com/w3c/csswg-drafts/issues/6642#issuecomment-943521484
+#
+#   function XYZ_to_OKLab(XYZ) {
+#     // Given XYZ relative to D65, convert to OKLab
+#     var XYZtoLMS = [
+#       [ 0.8190224432164319,    0.3619062562801221,   -0.12887378261216414  ],
+#       [ 0.0329836671980271,    0.9292868468965546,     0.03614466816999844 ],
+#       [ 0.048177199566046255,  0.26423952494422764,    0.6335478258136937  ]
+#     ];
+#     var LMStoOKLab = [
+#       [  0.2104542553,   0.7936177850,  -0.0040720468 ],
+#       [  1.9779984951,  -2.4285922050,   0.4505937099 ],
+#       [  0.0259040371,   0.7827717662,  -0.8086757660 ]
+#     ];
+#
+#     var LMS = multiplyMatrices(XYZtoLMS, XYZ);
+#     return multiplyMatrices(LMStoOKLab, LMS.map(c => Math.cbrt(c)));
+#     // L in range [0,1]. For use in CSS, multiply by 100 and add a percent
+#   }
+#
+#   function OKLab_to_XYZ(OKLab) {
+#     // Given OKLab, convert to XYZ relative to D65
+#     var LMStoXYZ =  [
+#       [  1.2268798733741557,  -0.5578149965554813,   0.28139105017721583 ],
+#       [ -0.04057576262431372,  1.1122868293970594,  -0.07171106666151701 ],
+#       [ -0.07637294974672142, -0.4214933239627914,   1.5869240244272418  ]
+#     ];
+#     var OKLabtoLMS = [
+#       [ 0.99999999845051981432,  0.39633779217376785678,   0.21580375806075880339  ],
+#       [ 1.0000000088817607767,  -0.1055613423236563494,   -0.063854174771705903402 ],
+#       [ 1.0000000546724109177,  -0.089484182094965759684, -1.2914855378640917399   ]
+#     ];
+#
+#     var LMSnl = multiplyMatrices(OKLabtoLMS, OKLab);
+#     return multiplyMatrices(LMStoXYZ, LMSnl.map(c => c ** 3));
+#   }
+#
+#   function OKLab_to_OKLCH(OKLab) {
+#     var hue = Math.atan2(OKLab[2], OKLab[1]) * 180 / Math.PI;
+#     return [
+#       OKLab[0], // L is still L
+#       Math.sqrt(OKLab[1] ** 2 + OKLab[2] ** 2), // Chroma
+#       hue >= 0 ? hue : hue + 360 // Hue, in degrees [0 to 360)
+#       ];
+#   }
+#
+#   function OKLCH_to_OKLab(OKLCH) {
+#     return [
+#       OKLCH[0], // L is still L
+#       OKLCH[1] * Math.cos(OKLCH[2] * Math.PI / 180), // a
+#       OKLCH[1] * Math.sin(OKLCH[2] * Math.PI / 180)  // b
+#     ];
+#   }
+
+# Y′ = 0.299∗R′+0.587∗G′ +0.114∗B′
+# U′ = 0.493 ∗ (B′ −Y′) = −0.147∗R′ −0.289∗G′ +0.436∗B′
+# V′ = 0.877 ∗ (R′ − Y′) = 0.615∗R′−0.515∗G′ −0.100∗B
+#
+# ′ R′ = Y′ +0.000∗U′ +1.140∗V′
+# G′ = Y′−0.396∗U′ −0.581∗V′
+# B′ = Y′+2.029∗U′ +0.000∗V′
+
+
+loscolores_from_methods <- c(rgb2ryb, rgb2ryb)
+loscolores_to_methods <- c(rgb2ryb, rgb2ryb)
+
+rgb2ycbcr_M <- matrix(c(0.299 , 0.587 , 0.114 ,
+                        -0.169 , -0.331 , 0.5,
+                        0.5, - 0.419 ,- 0.081), ncol = 3)
+ycbcr2rgb_M <- solve(rgb2ycbcr_M)
+rgb2ycbcr_K <- matrix(c(0, 128, 128))
+
+rgb2yuv_M <- matrix(c( 0.299 , 0.587 , 0.114 ,
+                       -0.147 , - 0.289 , 0.436 ,
+                       0.615 , - 0.515 ,- 0.1), ncol = 3)
+yuv2rgb_M <- solve(rgb2yuv_M)
+
+rgb2yiq_M <- matrix(c( 0.299 , 0.587 , 0.114 ,
+                       0.596,-0.275 ,-0.321 ,
+                       0.212 ,-0.523 , 0.311), ncol = 3)
+yiq2rgb_M <- solve(rgb2yiq_M)
+
+
+
+## hex colors by definition are in the sRGB color space
+
+
+# gamma (or transfer curve)
+gamma <- function(linear_channel, gamma = 2.4){
+  ifelse(linear_channel <= 0.0031308, linear_channel * 12.92 ,  1.055*linear_channel^(1/gamma) - 0.055)
+}
+
+degamma <- function(gamma_channel, gamma = 2.4){
+  ifelse ( gamma_channel <= 0.04045,gamma_channel / 12.92 , (( gamma_channel + 0.055)/1.055)^gamma)
+}
+#https://observablehq.com/@sebastien/srgb-rgb-gamma
+
+# Profile Connection Space <- PCS <- XYZ
+
+
+farver_spaces <- c("cmy", "cmyk", "hsl", "hsb", "hsv", "lab", "hunterlab",
+                   "oklab", "lch", "luv", "xyz", "yxy", "hcl", "oklch")
+
+colorscience_spaces <- c("lms", "yuv", "bvr", "rxryrz")
+colorscience2_spaces <- c("lef", "lslm", "ycc", "ycbcr", "yiq", "ypbpr")
+colorspace_spaces <- c("srgb", "rgb")
+loscolores_spaces <- c("hwb", "ryb")
+all_spaces <- c(farver_spaces, colorscience_spaces, colorscience2_spaces, colorspace_spaces)
+
+
+colorscience_from_methods <- c(colorscience::LMS2XYZ,
+                          colorscience::Yuv2XYZ,
+                          colorscience::BVR2XYZ,
+                          colorscience::RxRyRz2XYZ)
+
+colorscience_to_methods <- c(colorscience::XYZ2LMS,
+                               colorscience::XYZ2Yuv,
+                               colorscience::XYZ2BVR,
+                               colorscience::XYZ2RxRyRz)
+
+colorscience_colnames <- t(matrix(c("l", "m", "s",
+                             "y", "u", "v",
+                             "b", "v", "r",
+                             "rx", "ry", "rz"),
+                             nrow=3))
+
+colorscience2_colnames <- t(matrix(c("l", "e", "f",
+                                    "l", "s", "lm",
+                                    "y", "c", "c",
+                                    "y", "cb", "cr",
+                                    "y", "i", "q",
+                                    "y", "pb", "pr"),
+                                  nrow=3))
+
+colorscience2_from_methods <- c(colorscience::LEF2RGB,
+                           colorscience::LSLM2RGB,
+                           colorscience::PhotoYCC2RGB,
+                           colorscience::YCbCr2RGB,
+                           colorscience::YIQ2RGB,
+                           colorscience::YPbPr2RGB)
+
+colorscience2_to_methods <- c(colorscience::RGB2LEF,
+                                colorscience::RGB2LSLM,
+                                colorscience::RGB2PhotoYCC,
+                                colorscience::RGB2YCbCr,
+                                colorscience::RGB2YIQ,
+                                colorscience::RGB2YPbPr)
+
+
+
+
+
+
+
+# backlog espacios raros
+# HSI
+# TSL
+# DKL
+# DIN99
+# YES
+# YRGB  teoría del color de Ostwald: amarillo, rojo, azul y verde
+## espacios RGB
+## adobe RGB (wide gamut)
+## sRGB
+## Apple RGB
+## ISO RGB
+## extended ISO RGB
+## CIE RGB
+## ROMM RGB (kodak)
+## sc RGB
+## DCI-P3
+## Rec. 2020
+## Rec. 709
+
+pacman::p_load(colorspace, colorscience, farver)
+
+x <- t(col2rgb(colors()[1:6])/255)
+from1 = "srgb"
+to1 = "rgb"
+
+
+for(i in all_spaces){
+  x1 <- color_convert(x, from = from1, to = i)
+
+  x11 <- as(colorspace::sRGB(x),"XYZ")@coords
+  x12 <- XYZ2BVR(x11/100)
+  x13 <- BVR2XYZ(x12)
+
+  convert_colour(x*255, "rgb", "xyz")
+  as(colorspace::sRGB(x),"XYZ")@coords
+
+  for(j in all_spaces){
+    x2 <- color_convert(x1, from = i, to = j)
+
+    x3 <- color_convert(x2, from = j, to = from1)
+
+    err <- mean(abs(x3 - x))
+    if(err > 0.01){
+      print(paste0(i," ",j))
+      print(err)
+    }
+
+  }
+}
+
+
+color_convert <- function(x, from = "hex", to = "srgb"){
+  from = tolower(from)
+  to = tolower(to)
+  if(from %in% c("hex",all_spaces) & to %in% all_spaces){
+    pcs <- "xyz"
+    if(from == "hex"){
+      x <- farver::decode_colour(x)/255
+      x <- degamma(x)
+      from <- "rgb"
+    }
+    if(from != to){
+      if(from != pcs){
+        x <- to_pcs(x, from = from)
+      }
+      if(to != pcs){
+        x <- from_pcs(x, to = to)
+      }
+    }
+    return(x)
+  } else {
+    message("unsupported format")
+  }
+}
+
+## cagada con nombres de las columnas
+
+to_pcs <- function(x, from){
+  pcs <- "xyz"
+  if(from %in% farver_spaces){
+    return(farver::convert_colour(x, from = from, to = pcs))
+  }
+  if(from %in% colorscience_spaces){
+    return(apply(x, 2, FUN = colorscience_from_methods[[ which(from == colorscience_spaces) ]]))
+  }
+  if(from %in% colorscience2_spaces){
+    auxpcs <- apply(x, 2, FUN = colorscience2_from_methods[[ which(from == colorscience2_spaces) ]])
+    return(colorscience::RGB2XYZ(auxpcs))
+  }
+  if(from == "srgb"){
+    return(as(colorspace::sRGB(x), "XYZ")@coords)
+  }
+  if(from == "rgb"){
+    return(as(colorspace::RGB(x), "XYZ")@coords)
+  }
+  if(from %in% loscolores_spaces){
+    return(apply(x, 2, FUN = loscolores_from_methods[[ which(from == colorspace_spaces) ]]))
+  }
+}
+
+
+## case when o switch
+from_pcs <- function(x, to){
+  pcs <- "xyz"
+  if(to %in% farver_spaces){
+    return(farver::convert_colour(x, from = pcs, to = to))
+  }
+  if(to %in% colorscience_spaces){
+    x <- apply(x, 2, FUN = colorscience_to_methods[[ which(to == colorscience_spaces) ]])
+    colnames(x) <- colorscience_colnames[which(to == colorscience_spaces),]
+    return(x)
+  }
+  if(to %in% colorscience2_spaces){
+    auxpcs <- apply(x, 2, FUN = colorscience2_to_methods[[ which(to == colorscience2_spaces) ]])
+    x <- colorscience::RGB2XYZ(auxpcs)
+    colnames(x) <- colorscience2_colnames[which(to == colorscience2_spaces),]
+    return(x)
+  }
+  if(to == "srgb"){
+    return(as(colorspace::XYZ(x), "sRGB")@coords)
+  }
+  if(to == "rgb"){
+    return(as(colorspace::XYZ(x), "RGB")@coords)
+  }
+  if(to %in% loscolores_spaces){
+    return(apply(x, 2, FUN = loscolores_to_methods[[ which(to == colorspace_spaces) ]]))
+  }
+}
+
+
+
+
+
+
+
+
+
+# https://math.stackexchange.com/questions/305395/ryb-and-rgb-color-space-conversion
+# https://web.archive.org/web/20130525061042/www.insanit.net/tag/rgb-to-ryb/
+# https://en.wikipedia.org/wiki/RYB_color_model
+
+
+
+
+rgb2ycbcr <- function(x) {
+  dotp <- x %*% rgb2ycbcr_M
+
+  y <-  rgb2ycbcr_K[1] + dotp[,1]
+  cb <-  rgb2ycbcr_K[2] + dotp[,2]
+  cr <-  rgb2ycbcr_K[3] +  dotp[,3]
+
+  return(cbind(y, cb, cr))
+}
+
+ycbcr2rgb <- function(x) {
+  y  <- x[,1] - rgb2ycbcr_K[1]
+  cb <- x[,2] - rgb2ycbcr_K[2]
+  cr <- x[,3] - rgb2ycbcr_K[3]
+
+  dotp <- cbind(y,cb,cr) %*% ycbcr2rgb_M
+
+  r <- dotp[,1]
+  g <- dotp[,2]
+  b <- dotp[,3]
+
+  return(cbind(r, g, b))
+}
+
+rgb2yuv <- function(x) {
+  dotp <- (x/255) %*% rgb2yuv_M
+
+  y <-  dotp[,1]
+  u <-  dotp[,2]
+  v <-  dotp[,3]
+
+  return(cbind(y, u, v))
+}
+
+yuv2rgb <- function(x) {
+
+  dotp <- (x %*% yuv2rgb_M)*255
+
+  r <- dotp[,1]
+  g <- dotp[,2]
+  b <- dotp[,3]
+
+  return(cbind(r, g, b))
+}
+
+rgb2yiq <- function(x) {
+  dotp <- (x/255) %*% rgb2yiq_M
+
+  y <-  dotp[,1]
+  i <-  dotp[,2]
+  q <-  dotp[,3]
+
+  return(cbind(y, i, q))
+}
+
+yiq2rgb <- function(x) {
+
+  dotp <- (x %*% yiq2rgb_M)*255
+
+  r <- dotp[,1]
+  g <- dotp[,2]
+  b <- dotp[,3]
+
+  return(cbind(r, g, b))
+}
+
+rgb2ryb <- function(x){
+  if(max(x)>1) x <- x/255
+
+  r <- x[,1]
+  g <- x[,2]
+  b <- x[,3]
+
+  whites <- apply(x,1,min)
+  blacks <- apply(1-x,1,min)
+
+  r <- r - whites
+  g <- g - whites
+  b <- b - whites
+
+  ymin <- apply(cbind(r,g),1,min)
+
+  r2 <- r - ymin
+  y2 <- 0.5 * (g + ymin)
+  b2 <- 0.5 * (b + g - ymin)
+
+  denom <- apply(cbind(r,g,b),1,max)
+  denom[denom==0] <- 1
+
+  n <- apply(cbind(r2,y2,b2),1,max) / denom
+  n[n==0] <- 1
+
+  r2 <- r2 / n
+  y2 <- y2 / n
+  b2 <- b2 / n
+
+  r <- r2 + blacks
+  y <- y2 + blacks
+  b <- b2 + blacks
+
+  return(cbind(r,y,b)*255)
+}
+
+ryb2rgb <- function(x){
+  x <- x/255
+
+  r <- x[,1]
+  y <- x[,2]
+  b <- x[,3]
+
+  whites <- apply(x,1,min)
+  blacks <- apply(1-x,1,min)
+
+  r <- r - blacks
+  y <- y - blacks
+  b <- b - blacks
+
+  gmin <- apply(cbind(y,b),1,min)
+
+  r2 <- r + y - gmin
+  g2 <- y + gmin
+  b2 <-  2 * (b - gmin)
+
+  denom <- apply(cbind(r,y,b),1,max)
+  denom[denom==0] <- 1
+
+  n <- apply(cbind(r2,g2,b2),1,max) / denom
+  n[n==0] <- 1
+
+  r2 <- r2 / n
+  g2 <- g2 / n
+  b2 <- b2 / n
+
+  r <- r2 + whites
+  g <- g2 + whites
+  b <- b2 + whites
+
+  return(cbind(r,g,b)*255)
+}
+
+rgb2hwb <- function(x){
+  aux <- farver::convert_colour(x, from = "rgb", to = "hsv")
+  h <- aux[,1]
+  w <- (1-aux[,2])*aux[,3]
+  b <- 1 - aux[,3]
+  return(cbind(h,w,b))
+}
+
+hwb2rgb <- function(x){
+  h <- x[,1]
+  s <- 1 - x[,2]/(1-x[,3])
+  v <- 1 - x[,3]
+
+  aux <- farver::convert_colour(cbind(h,s,v), from = "hsv", to = "rgb")
+  return(aux)
+
+}
+
+
+
