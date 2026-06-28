@@ -1,14 +1,33 @@
-#' Constructor del sistema loscolores
 #' @export
-loscolores_system <- function(input_hex, n_cat = 10, n_seq = 5, n_div = 5) {
-  raw_5 <- get_raw_5(input_hex)
-  sys <- list(
-    input = input_hex,
-    raw_5 = raw_5,
-    categorical = gen_categorical(raw_5, n_cat),
-    sequential = gen_sequential(raw_5, n_seq),
-    divergent = gen_divergent(raw_5, n_div)
+loscolores_system <- function(x) {
+  input_hex <- get_input_vector(x)
+  core <- get_raw_5(input_hex)
+  expansions <- get_expansion_params(core)
+  
+  structure(
+    list(
+      input = input_hex,
+      raw_5 = core$raw_5,
+      polos = list(black = core$hex_black, white = core$hex_white),
+      categorical = expansions$categorical,
+      sequential = expansions$sequential,
+      divergent = expansions$divergent
+    ),
+    class = "lc_system"
   )
-  class(sys) <- "lc_system"
+}
+
+#' @export
+set.loscolores <- function(...) {
+  # 1. Capturar inputs variádicos (ej. set.loscolores("#00FFCC", "#FF00FF"))
+  input_raw <- c(...)
+  
+  # 2. Computar topología
+  sys <- loscolores_system(input_raw)
+  
+  # 3. Mutar el estado global de la sesión
+  options(loscolores.active_system = sys)
+  
+  # 4. Devolver visiblemente para permitir encadenamiento o ploteo directo: plot(set.loscolores("mario"))
   return(sys)
 }

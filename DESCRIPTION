@@ -1,11 +1,19 @@
 Package: loscolores
-Type: Package
-Title: Generate Color Palettes From Instagram Pictures
+Title: Engineering-Grade Perceptual Color Systems
 Version: 0.1.0
-Author: Raimundo Sanchez
-Maintainer: Raimundo Sanchez <raimundosanchezy@gmail.com>
-Description: Generate discrete or continuos palettes from 39 instagram posts.
-    It can generate up to 64 colors from each palette index
-License: What license is it under?
+Authors@R: person("Raimundo", "Sanchez", email = "raimundosanchezu@gmail.com", role = c("aut", "cre"))
+Description: A perceptual color system builder based on OKLab. Ensures luminance hierarchy, applies entropy safety to achromatic inputs, and provides robust manifolds for categorical, sequential, and divergent data visualization.
+License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: false
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Imports: 
+    ggplot2,
+    farver,
+    patchwork,
+    dplyr,
+    stats,
+    cli,
+    scales
+Depends: 
+    R (>= 3.5)
