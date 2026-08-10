@@ -10,7 +10,7 @@ plots.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("<your-username>/loscolores")
+remotes::install_github("raimun2/loscolores")
 ```
 
 ## Quick start
