@@ -3,7 +3,7 @@
 # ggplot2 scale integration: categorical, sequential, divergent
 # ==============================================================================
 
-# ── Categorical ───────────────────────────────────────────────────────────────
+# -- Categorical ---------------------------------------------------------------
 
 #' Loscolores categorical fill scale
 #' @param option   Variant key ("Option_A" through "Option_D").
@@ -17,7 +17,7 @@ scale_fill_loscolores_cat <- function(option    = "Option_A",
                                       grayscale = FALSE,
                                       ...) {
   if (is.null(sys))
-    stop("No hay sistema activo. Llama set.loscolores() primero.", call. = FALSE)
+    stop("No active system. Call set_loscolores() first.", call. = FALSE)
   ggplot2::discrete_scale(
     "fill", "loscolores_cat",
     palette = function(n) sample_system(sys, "categorical", option, n,
@@ -34,7 +34,7 @@ scale_color_loscolores_cat <- function(option    = "Option_A",
                                        grayscale = FALSE,
                                        ...) {
   if (is.null(sys))
-    stop("No hay sistema activo. Llama set.loscolores() primero.", call. = FALSE)
+    stop("No active system. Call set_loscolores() first.", call. = FALSE)
   ggplot2::discrete_scale(
     "colour", "loscolores_cat",
     palette = function(n) sample_system(sys, "categorical", option, n,
@@ -48,7 +48,7 @@ scale_color_loscolores_cat <- function(option    = "Option_A",
 scale_colour_loscolores_cat <- scale_color_loscolores_cat
 
 
-# ── Sequential ────────────────────────────────────────────────────────────────
+# -- Sequential ----------------------------------------------------------------
 
 #' Loscolores sequential fill scale
 #' @param option   Variant key ("Option_A" through "Option_E").
@@ -63,7 +63,7 @@ scale_fill_loscolores_seq <- function(option    = "Option_A",
                                       grayscale = FALSE,
                                       ...) {
   if (is.null(sys))
-    stop("No hay sistema activo. Llama set.loscolores() primero.", call. = FALSE)
+    stop("No active system. Call set_loscolores() first.", call. = FALSE)
   ggplot2::continuous_scale(
     "fill", "loscolores_seq",
     palette = scales::gradient_n_pal(
@@ -81,7 +81,7 @@ scale_color_loscolores_seq <- function(option    = "Option_A",
                                        grayscale = FALSE,
                                        ...) {
   if (is.null(sys))
-    stop("No hay sistema activo. Llama set.loscolores() primero.", call. = FALSE)
+    stop("No active system. Call set_loscolores() first.", call. = FALSE)
   ggplot2::continuous_scale(
     "colour", "loscolores_seq",
     palette = scales::gradient_n_pal(
@@ -96,7 +96,7 @@ scale_color_loscolores_seq <- function(option    = "Option_A",
 scale_colour_loscolores_seq <- scale_color_loscolores_seq
 
 
-# ── Divergent ─────────────────────────────────────────────────────────────────
+# -- Divergent -----------------------------------------------------------------
 
 #' Loscolores divergent fill scale
 #' @param option   Variant key ("Option_A" through "Option_E").
@@ -113,7 +113,7 @@ scale_fill_loscolores_div <- function(option    = "Option_A",
                                       grayscale = FALSE,
                                       ...) {
   if (is.null(sys))
-    stop("No hay sistema activo. Llama set.loscolores() primero.", call. = FALSE)
+    stop("No active system. Call set_loscolores() first.", call. = FALSE)
   ggplot2::continuous_scale(
     "fill", "loscolores_div",
     palette = scales::gradient_n_pal(
@@ -133,7 +133,7 @@ scale_color_loscolores_div <- function(option    = "Option_A",
                                        grayscale = FALSE,
                                        ...) {
   if (is.null(sys))
-    stop("No hay sistema activo. Llama set.loscolores() primero.", call. = FALSE)
+    stop("No active system. Call set_loscolores() first.", call. = FALSE)
   ggplot2::continuous_scale(
     "colour", "loscolores_div",
     palette = scales::gradient_n_pal(

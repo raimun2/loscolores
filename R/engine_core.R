@@ -3,13 +3,6 @@
 # Oklab Mathematical Engine: Pole Hijacking, Dimensional Expansion & L-Dictator
 # ==============================================================================
 
-#' Default pole accessors
-#' @export
-lc_white <- function() to_oklab("#F4F3F3")
-#' @export
-lc_black <- function() to_oklab("#1D1C1B")
-
-
 #' Build the stabilized 5-color core (Raw 5)
 #'
 #' Accepts a sanitized HEX vector of any length and returns exactly 5 colors
@@ -17,20 +10,21 @@ lc_black <- function() to_oklab("#1D1C1B")
 #' plus the active black and white poles.
 #'
 #' @param input_hex   Sanitized #RRGGBB vector (output of \code{get_input_vector}).
-#' @param hex_black   Default dark pole.
-#' @param hex_white   Default light pole.
-#' @return Named list: \code{raw_5} (chr[5]), \code{hex_black}, \code{hex_white}.
+#' @param hex_black   Default dark pole. Sourced from internal sysdata (\code{lc_black}).
+#' @param hex_white   Default light pole. Sourced from internal sysdata (\code{lc_white}).
+#' @return Named list: \code{raw_5} (`chr(5)`), \code{hex_black}, \code{hex_white}.
 #' @importFrom stats kmeans
+#' @importFrom utils head
 #' @export
 get_raw_5 <- function(input_hex,
-                      hex_black = "#1D1C1B",
-                      hex_white = "#F4F3F3") {
+                      hex_black = lc_black,
+                      hex_white = lc_white) {
 
   lab_init     <- to_oklab(input_hex)
   L_black_base <- to_oklab(hex_black)$L[1L]
   L_white_base <- to_oklab(hex_white)$L[1L]
 
-  # ── 1. POLE HIJACKING (The Horizon) ─────────────────────────────────────────
+  # -- 1. POLE HIJACKING (The Horizon) -----------------------------------------
   # Colors falling inside the pole zones override the default poles.
   zone_black <- L_black_base + 0.08
   zone_white <- L_white_base - 0.08
@@ -38,8 +32,12 @@ get_raw_5 <- function(input_hex,
   in_black <- lab_init$L <= zone_black
   in_white <- lab_init$L >= zone_white
 
-  hex_black_active <- if (any(in_black)) input_hex[which(in_black)[1L]] else hex_black
-  hex_white_active <- if (any(in_white)) input_hex[which(in_white)[1L]] else hex_white
+  # When a pole is hijacked, keep only its L and strip hue/chroma to grayscale
+  # (an input "white" that's actually a warm off-white shouldn't tint the pole).
+  hex_black_active <- if (any(in_black))
+    to_hex(lab_init$L[which(in_black)[1L]], 0, 0) else hex_black
+  hex_white_active <- if (any(in_white))
+    to_hex(lab_init$L[which(in_white)[1L]], 0, 0) else hex_white
 
   L_black_active <- to_oklab(hex_black_active)$L[1L]
   L_white_active <- to_oklab(hex_white_active)$L[1L]
@@ -47,7 +45,7 @@ get_raw_5 <- function(input_hex,
   # Remove pole-zone colors from the chromatic signal
   is_signal <- !in_black & !in_white
 
-  # Edge case: input is entirely poles → keep first color as a degenerate anchor
+  # Edge case: input is entirely poles -> keep first color as a degenerate anchor
   if (!any(is_signal)) {
     lab_signal <- lab_init[1L, , drop = FALSE]
   } else {
@@ -57,12 +55,12 @@ get_raw_5 <- function(input_hex,
   n_sig     <- nrow(lab_signal)
   basal_lab <- lab_signal[1L, , drop = FALSE]   # The Immutable Anchor
 
-  # ── 2. DISTILLATION / EXPANSION ─────────────────────────────────────────────
+  # -- 2. DISTILLATION / EXPANSION ---------------------------------------------
   min_L_safe <- L_black_active + 0.08
   max_L_safe <- L_white_active - 0.08
 
   if (n_sig > 5L) {
-    # Overflow → k-means on satellites, anchor is protected
+    # Overflow -> k-means on satellites, anchor is protected
     others_data   <- lab_signal[-1L, c("L", "a", "b"), drop = FALSE]
     unique_others <- unique(others_data)
 
@@ -83,7 +81,7 @@ get_raw_5 <- function(input_hex,
     pool <- as.data.frame(lab_signal[, c("L", "a", "b")])
 
   } else {
-    # Underflow → radial expansion
+    # Underflow -> radial expansion
     # FIX: seed satellites at evenly-spread L values, not at anchor's L.
     # This prevents L-Dictator from having to shove everything upward.
     n_missing <- 5L - n_sig
@@ -118,7 +116,7 @@ get_raw_5 <- function(input_hex,
   pool$c <- sqrt(pool$a^2 + pool$b^2)
   pool$h <- (atan2(pool$b, pool$a) * 180 / pi) %% 360
 
-  # ── 3. HUE PIVOT (Traffic Jam Protection) ───────────────────────────────────
+  # -- 3. HUE PIVOT (Traffic Jam Protection) -----------------------------------
   h_rad    <- pool$h * pi / 180
   circ_var <- 1 - sqrt(mean(cos(h_rad))^2 + mean(sin(h_rad))^2)
 
@@ -129,11 +127,11 @@ get_raw_5 <- function(input_hex,
     pool$b[c(3L, 5L)] <- sin(pool$h[c(3L, 5L)] * pi / 180) * pool$c[c(3L, 5L)]
   }
 
-  # ── 4. L-DICTATOR (Iron Law of Perceptual Separation) ───────────────────────
+  # -- 4. L-DICTATOR (Iron Law of Perceptual Separation) -----------------------
   min_gap <- 0.15
   L_vals  <- pool$L
 
-  # Anchor: clamp to safe zone but never change further — L is sacred.
+  # Anchor: clamp to safe zone but never change further - L is sacred.
   L_anchor_original <- basal_lab$L[1L]
   L_vals[1L] <- pmax(min_L_safe, pmin(max_L_safe, L_anchor_original))
 
@@ -181,7 +179,7 @@ get_raw_5 <- function(input_hex,
 
   pool$L <- L_vals
 
-  # ── 5. FINAL ASSEMBLY ────────────────────────────────────────────────────────
+  # -- 5. FINAL ASSEMBLY --------------------------------------------------------
   # Output order: anchor first, satellites sorted ascending by L.
   anchor_row    <- pool[1L, , drop = FALSE]
   sat_rows      <- pool[2L:5L, ]

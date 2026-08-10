@@ -27,7 +27,7 @@ get_dynamic_slate <- function(sys) {
 #' Dynamic loscolores ggplot2 theme
 #'
 #' All colors are derived from the currently active \code{lc_system} poles,
-#' so the theme stays coherent after any \code{set.loscolores()} call.
+#' so the theme stays coherent after any \code{set_loscolores()} call.
 #'
 #' @param base_family Primary typeface. Defaults to \code{"dm"} (DM Sans via
 #'   Google Fonts). Falls back to \code{"sans"} if unavailable.
@@ -37,7 +37,7 @@ get_dynamic_slate <- function(sys) {
 #' @export
 theme_loscolores <- function(base_family = "dm") {
 
-  # Lazy font loading — silently skips if no internet
+  # Lazy font loading - silently skips if no internet
   if (!("dm" %in% sysfonts::font_families())) {
     tryCatch(
       sysfonts::font_add_google("DM Sans", "dm"),
@@ -54,7 +54,7 @@ theme_loscolores <- function(base_family = "dm") {
 
   sys <- getOption("loscolores.default_system")
   if (is.null(sys))
-    stop("El sistema no está inicializado. Llama set.loscolores() primero.",
+    stop("System not initialized. Call set_loscolores() first.",
          call. = FALSE)
 
   col_white <- sys$polos$white

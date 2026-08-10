@@ -5,11 +5,11 @@
 
 #' Build expansion parameter nodes for all palette topologies
 #'
-#' @param raw_5_hex  Character[5]. Core colors from \code{get_raw_5}.
+#' @param raw_5_hex  `Character(5)`. Core colors from \code{get_raw_5}.
 #' @param hex_black  Active dark pole.
 #' @param hex_white  Active light pole.
 #' @return Nested list with slots \code{categorical}, \code{sequential},
-#'         \code{divergent}. Each slot has Options A–E (categorical) or A–E
+#'         \code{divergent}. Each slot has Options A-E (categorical) or A-E
 #'         (sequential/divergent).
 #' @importFrom dplyr mutate select
 #' @export
@@ -21,11 +21,11 @@ get_expansion_params <- function(raw_5_hex, hex_black, hex_white) {
 
   exp <- list()
 
-  # ── 1. CATEGORICAL TOPOLOGIES ────────────────────────────────────────────────
+  # -- 1. CATEGORICAL TOPOLOGIES ------------------------------------------------
   # Option_A  : Natural order (L-Dictator sequence)
   # Option_B/C: Contrast-jump reorderings
   # Option_D  : Forced chroma floor + subtle hue shift (max vibrance)
-  # Option_DIAG: Isostatic L=0.60 — diagnostic only, not exposed in production
+  # Option_DIAG: Isostatic L=0.60 - diagnostic only, not exposed in production
   exp$categorical <- list(
     Option_A = lab_5,
     Option_B = lab_5[c(1L, 4L, 2L, 5L, 3L), ],
@@ -38,12 +38,12 @@ get_expansion_params <- function(raw_5_hex, hex_black, hex_white) {
       b     = sin(h_new * pi / 180) * c_new
     ) |> dplyr::select(L, a, b, c = c_new, h = h_new)
   )
-  # Diagnostic variant kept separate — never iterated in plot.lc_system
+  # Diagnostic variant kept separate - never iterated in plot.lc_system
   exp$categorical_diag <- list(
     Option_DIAG = dplyr::mutate(lab_5, L = 0.60)
   )
 
-  # ── 2. HELPER: polar target displacement ─────────────────────────────────────
+  # -- 2. HELPER: polar target displacement -------------------------------------
   get_target <- function(row, dL, dh) {
     nL <- pmax(0.05, pmin(0.95, row$L + dL))
     nh <- (row$h + dh) %% 360
@@ -54,8 +54,8 @@ get_expansion_params <- function(raw_5_hex, hex_black, hex_white) {
                h = nh)
   }
 
-  # ── 3. SEQUENTIAL TOPOLOGIES ─────────────────────────────────────────────────
-  # FIX: end node → white pole (desaturated), not a blind +0.5 L offset.
+  # -- 3. SEQUENTIAL TOPOLOGIES -------------------------------------------------
+  # FIX: end node -> white pole (desaturated), not a blind +0.5 L offset.
   # This guarantees the ramp always reaches a real light anchor without clipping.
   exp$sequential <- lapply(seq_len(5L), function(i) {
     list(
@@ -70,7 +70,7 @@ get_expansion_params <- function(raw_5_hex, hex_black, hex_white) {
     )
   })
 
-  # ── 4. DIVERGENT TOPOLOGIES ──────────────────────────────────────────────────
+  # -- 4. DIVERGENT TOPOLOGIES --------------------------------------------------
   # low  : complement of the base color, shifted darker
   # mid  : white pole (default center)
   # mid_dark: black pole (alternative center)
@@ -113,10 +113,10 @@ sample_system <- function(sys,
 
   params <- sys$expansion[[type]][[option]]
   if (is.null(params))
-    stop(sprintf("Topología '%s / %s' no encontrada en el sistema.", type, option),
+    stop(sprintf("Topology '%s / %s' not found in the system.", type, option),
          call. = FALSE)
 
-  # ── Categorical ──────────────────────────────────────────────────────────────
+  # -- Categorical --------------------------------------------------------------
   if (type == "categorical") {
     n_nodes <- nrow(params)
     t_in    <- seq(0, 1, length.out = n_nodes)
@@ -137,7 +137,7 @@ sample_system <- function(sys,
     return(hex_out)
   }
 
-  # ── Sequential ───────────────────────────────────────────────────────────────
+  # -- Sequential ---------------------------------------------------------------
   t <- seq(0, 1, length.out = n)
 
   if (type == "sequential") {
@@ -149,7 +149,7 @@ sample_system <- function(sys,
     return(to_hex(L_out, a_out, b_out))
   }
 
-  # ── Divergent ─────────────────────────────────────────────────────────────────
+  # -- Divergent -----------------------------------------------------------------
   if (type == "divergent") {
     mid_pt   <- if (center == "white") params$mid else params$mid_dark
     L_out    <- numeric(n)
@@ -173,5 +173,5 @@ sample_system <- function(sys,
     return(to_hex(L_out, a_out, b_out))
   }
 
-  stop("type debe ser 'categorical', 'sequential' o 'divergent'.", call. = FALSE)
+  stop("type must be 'categorical', 'sequential', or 'divergent'.", call. = FALSE)
 }
