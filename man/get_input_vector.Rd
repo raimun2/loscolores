@@ -14,6 +14,6 @@ Character vector of unique, valid #RRGGBB codes.
 }
 \description{
 Accepts a single palette key from internal sysdata (\code{names(paletas)}),
-HEX strings, or R color names. Strips alpha, deduplicates, and returns a
-clean #RRGGBB vector.
+HEX strings (#RGB, #RRGGBB, #RRGGBBAA), or R color names. Strips alpha,
+upper-cases, deduplicates, and returns a clean #RRGGBB vector.
 }

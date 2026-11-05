@@ -13,7 +13,7 @@ get_dynamic_slate(sys)
 One #RRGGBB string.
 }
 \description{
-Blends 85\% of the white pole's lightness with 15\% of the black pole's,
-carrying a ghost of the black pole's chromatic tint.
+Blends 85\% of the white pole's lightness with 15\% of the black pole's.
+Poles are neutral, so the slate is a neutral grey.
 }
 \keyword{internal}

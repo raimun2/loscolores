@@ -21,7 +21,7 @@ sample_system(
 
 \item{option}{Variant key: \code{"Option_A"} through \code{"Option_D"}
 (categorical) or \code{"Option_A"} through \code{"Option_E"}
-(sequential/divergent).}
+(sequential/divergent, one per core colour). \code{"A"} also works.}
 
 \item{n}{Number of output colors.}
 

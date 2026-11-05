@@ -2,20 +2,21 @@
 % Please edit documentation in R/utils_color.R
 \name{to_hex}
 \alias{to_hex}
-\title{Convert Oklab coordinates to HEX with gamut clipping}
+\title{Convert OKLab coordinates to HEX with gamut mapping}
 \usage{
 to_hex(L, a, b)
 }
 \arguments{
-\item{L}{Numeric vector. Oklab lightness in \verb{[0, 1]}.}
+\item{L}{Numeric vector. OKLab lightness in \verb{[0, 1]}.}
 
-\item{a}{Numeric vector. Oklab green-red axis.}
+\item{a}{Numeric vector. OKLab green-red axis.}
 
-\item{b}{Numeric vector. Oklab blue-yellow axis.}
+\item{b}{Numeric vector. OKLab blue-yellow axis.}
 }
 \value{
 Character vector of #RRGGBB codes.
 }
 \description{
-Convert Oklab coordinates to HEX with gamut clipping
+Out-of-gamut colours keep their lightness and hue; only chroma is reduced
+until they fit sRGB (luminance is the backbone of the system).
 }

@@ -4,10 +4,13 @@
 \alias{loscolores_system}
 \title{Build a loscolores perceptual color system}
 \usage{
-loscolores_system(x)
+loscolores_system(x, pivot = TRUE)
 }
 \arguments{
 \item{x}{HEX vector, R color names, or a sysdata palette key.}
+
+\item{pivot}{Logical. Rotate two satellites when hues are jammed (turn off
+for monochrome systems).}
 }
 \value{
 An object of class \code{lc_system}.

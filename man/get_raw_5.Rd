@@ -2,22 +2,21 @@
 % Please edit documentation in R/engine_core.R
 \name{get_raw_5}
 \alias{get_raw_5}
-\title{Build the stabilized 5-color core (Raw 5)}
+\title{Build the stabilized core: 2 neutral poles + 5 colours}
 \usage{
-get_raw_5(input_hex, hex_black = lc_black, hex_white = lc_white)
+get_raw_5(input_hex, pivot = TRUE)
 }
 \arguments{
 \item{input_hex}{Sanitized #RRGGBB vector (output of \code{get_input_vector}).}
 
-\item{hex_black}{Default dark pole. Sourced from internal sysdata (\code{lc_black}).}
-
-\item{hex_white}{Default light pole. Sourced from internal sysdata (\code{lc_white}).}
+\item{pivot}{Logical. Rotate two satellites when hues are jammed.}
 }
 \value{
-Named list: \code{raw_5} (\code{chr(5)}), \code{hex_black}, \code{hex_white}.
+List with \code{raw_5} (hex), \code{hex_black}, \code{hex_white},
+\code{lab} (OKLab values), \code{min_gap}, \code{hue_variance}, \code{log}.
 }
 \description{
-Accepts a sanitized HEX vector of any length and returns exactly 5 colors
-whose luminance values are perceptually separated (L-Dictator guarantee),
-plus the active black and white poles.
+The anchor (first non-pole input) keeps its exact hex and L. The other four
+slots are distilled from or expanded around the input, then placed on an L
+ladder that maximises the minimum lightness gap. Every decision is logged.
 }

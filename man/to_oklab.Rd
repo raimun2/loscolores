@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_color.R
 \name{to_oklab}
 \alias{to_oklab}
-\title{Convert HEX vector to Oklab data frame}
+\title{Convert HEX vector to OKLab data frame}
 \usage{
 to_oklab(hex_vector)
 }
@@ -10,8 +10,8 @@ to_oklab(hex_vector)
 \item{hex_vector}{Character vector of #RRGGBB codes.}
 }
 \value{
-Data frame with columns L, a, b (Oklab) plus c (chroma) and h (hue in degrees).
+Data frame with columns L, a, b (OKLab) plus c (chroma) and h (hue in degrees).
 }
 \description{
-Convert HEX vector to Oklab data frame
+Convert HEX vector to OKLab data frame
 }

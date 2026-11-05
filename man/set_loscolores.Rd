@@ -4,10 +4,12 @@
 \alias{set_loscolores}
 \title{Set the active loscolores system for the session}
 \usage{
-set_loscolores(...)
+set_loscolores(..., pivot = TRUE)
 }
 \arguments{
 \item{...}{One or more HEX strings or R color names (e.g. \code{set_loscolores("red")}).}
+
+\item{pivot}{Logical. Rotate two satellites when hues are jammed.}
 }
 \value{
 An \code{lc_system} object (invisible).
