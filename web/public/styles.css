@@ -1,0 +1,106 @@
+/* The page wears the system it shows: --bg is the light pole, --fg the dark pole,
+   --accent the anchor, --line the slate. app.js updates them live. */
+:root {
+  --bg: #F4F3F3; --fg: #1D1C1B; --accent: #096ED3; --line: #CFCFCF;
+  --card: color-mix(in oklab, var(--bg) 92%, var(--fg));
+  --muted: color-mix(in oklab, var(--fg) 62%, var(--bg));
+  --r: 14px;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.5 "DM Sans", system-ui, sans-serif;
+  transition: background .25s, color .25s;
+}
+main { max-width: 760px; margin: 0 auto; padding: 20px 16px calc(40px + env(safe-area-inset-bottom)); }
+h1, h2 { font-family: "Space Grotesk", "DM Sans", sans-serif; letter-spacing: -0.01em; margin: 0; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.15rem; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.n { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%;
+     background: var(--fg); color: var(--bg); font-size: .8rem; }
+.tag { margin: 4px 0 14px; color: var(--muted); }
+.hint { margin: 0 0 12px; color: var(--muted); font-size: .9rem; }
+a { color: inherit; }
+
+.card { background: var(--card); border-radius: var(--r); padding: 16px; margin-top: 14px; }
+
+.raw7 { display: flex; height: 14px; border-radius: 7px; overflow: hidden; }
+.raw7 span { flex: 1; }
+
+/* chips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--bg);
+        color: var(--fg); border-radius: 999px; padding: 4px 12px 4px 4px; font: 500 .85rem "JetBrains Mono", monospace;
+        cursor: pointer; min-height: 40px; position: relative; }
+.chip i { width: 30px; height: 30px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.chip.anchor { border: 2px solid var(--fg); }
+.chip.anchor::after { content: "anchor"; font: 700 .62rem "DM Sans"; text-transform: uppercase; letter-spacing: .06em; margin-left: 2px; }
+.chip.pole { opacity: .7; }
+.chipMenu { flex-basis: 100%; display: flex; gap: 6px; background: var(--fg); padding: 6px; border-radius: 10px; }
+.chipMenu button { background: var(--bg); color: var(--fg); border: 0; border-radius: 6px; padding: 8px 10px; font: 500 .8rem "DM Sans"; }
+
+.add { display: flex; gap: 8px; margin-top: 12px; }
+.add input[type=color] { width: 44px; height: 44px; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: none; flex: none; }
+.add input[type=text] { flex: 1; min-width: 0; height: 44px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px;
+                        background: var(--bg); color: var(--fg); font: 16px "JetBrains Mono", monospace; }
+button { cursor: pointer; font-family: inherit; }
+.add button, #copy { height: 44px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--fg); color: var(--bg); font-weight: 700; }
+
+.presets { margin-top: 12px; }
+.presets summary { cursor: pointer; color: var(--muted); font-size: .9rem; padding: 6px 0; }
+.presetGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+.preset { border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 10px; padding: 8px; text-align: left; font-size: .75rem; }
+.preset .raw7 { height: 16px; margin-bottom: 6px; border-radius: 4px; }
+
+/* reasoning */
+.rows { display: grid; gap: 8px; }
+.row { display: grid; grid-template-columns: 96px 1fr; align-items: center; gap: 10px; }
+.lbl { font-size: .78rem; color: var(--muted); }
+.strip { display: flex; height: 40px; border-radius: 8px; overflow: hidden; }
+.strip span { flex: 1; position: relative; }
+.strip span.anc::after { content: ""; position: absolute; left: 50%; bottom: 4px; width: 6px; height: 6px; margin-left: -3px;
+                         border-radius: 50%; background: var(--dot, #fff); }
+.strip.big { height: 56px; margin-top: 12px; }
+.strip.big span.anc::after { bottom: auto; top: 6px; }
+.strip.big span { display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px;
+                  font: 10px "JetBrains Mono", monospace; }
+.ladderWrap { margin-top: 14px; }
+#ladder { width: 100%; height: 64px; display: block; color: var(--fg); }
+.log { list-style: none; padding: 0; margin: 12px 0; display: grid; gap: 6px; font-size: .88rem; }
+.log li { display: grid; grid-template-columns: 64px 1fr; gap: 8px; }
+.log b { font: 700 .65rem "DM Sans"; text-transform: uppercase; letter-spacing: .06em; padding: 3px 6px; border-radius: 6px;
+         background: var(--fg); color: var(--bg); height: fit-content; text-align: center; }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: .9rem; margin-top: 10px; min-height: 32px; }
+.toggle input { width: 20px; height: 20px; accent-color: var(--accent); }
+
+/* system */
+.seg { display: flex; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 3px; overflow-x: auto; }
+.seg button { flex: 1; border: 0; background: none; color: var(--fg); padding: 9px 10px; border-radius: 7px; font-weight: 500; font-size: .9rem; white-space: nowrap; }
+.seg button.on { background: var(--fg); color: var(--bg); }
+.seg.small button { font-size: .8rem; padding: 6px 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; align-items: center; }
+.pills { display: flex; gap: 6px; }
+.pills button { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); color: var(--fg); font-weight: 700; }
+.pills button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.ctl { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.ctl button { width: 40px; height: 40px; border: 0; background: none; color: var(--fg); font-size: 1.2rem; }
+.ctl span { min-width: 64px; text-align: center; font-size: .85rem; }
+.chart { margin-top: 12px; border-radius: 10px; overflow: hidden; }
+.chart svg { display: block; width: 100%; height: auto; }
+
+/* export */
+.langs button { flex: none; }
+.code { position: relative; margin-top: 10px; }
+.code pre { margin: 0; background: var(--fg); color: var(--bg); border-radius: 10px; padding: 14px 14px 60px;
+            font: 12px/1.55 "JetBrains Mono", monospace; white-space: pre-wrap; word-break: break-all; max-height: 360px; overflow: auto; }
+#copy { position: absolute; right: 8px; bottom: 8px; background: var(--bg); color: var(--fg); }
+
+footer { margin-top: 24px; font-size: .8rem; color: var(--muted); text-align: center; }
+
+@media (min-width: 720px) {
+  main { padding-top: 40px; }
+  h1 { font-size: 2.8rem; }
+  .card { padding: 22px; }
+  .row { grid-template-columns: 120px 1fr; }
+}

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>loscolores</title>
+  <meta name="description" content="Perceptual colour systems from any reference colour. Rules over taste.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 10'%3E%3Crect width='10' height='10' fill='%231D1C1B'/%3E%3Crect x='10' width='10' height='10' fill='%23096ED3'/%3E%3Crect x='20' width='10' height='10' fill='%232A3940'/%3E%3Crect x='30' width='10' height='10' fill='%2300642E'/%3E%3Crect x='40' width='10' height='10' fill='%23D28700'/%3E%3Crect x='50' width='10' height='10' fill='%23FFA7CA'/%3E%3Crect x='60' width='10' height='10' fill='%23F4F3F3'/%3E%3C/svg%3E">
+</head>
+<body>
+  <main>
+    <header class="top">
+      <h1>loscolores</h1>
+      <p class="tag">Perceptual colour systems from any reference colour. Rules over taste.</p>
+      <div class="raw7 hero" id="hero" aria-hidden="true"></div>
+    </header>
+
+    <section class="card" id="input">
+      <h2><span class="n">1</span> Reference colours</h2>
+      <p class="hint">The first colour is the anchor: its exact value is kept. Tap a chip to make it the anchor or remove it.</p>
+      <div class="chips" id="chips"></div>
+      <form class="add" id="addForm" autocomplete="off">
+        <input type="color" id="picker" value="#096ED3" aria-label="Pick a colour">
+        <input type="text" id="hexIn" placeholder="#096ED3, teal, or a list" aria-label="Colour as hex or name">
+        <button type="submit">Add</button>
+      </form>
+      <details class="presets">
+        <summary>Start from one of my palettes</summary>
+        <div class="presetGrid" id="presets"></div>
+      </details>
+    </section>
+
+    <section class="card" id="reasoning">
+      <h2><span class="n">2</span> How it got here</h2>
+      <div class="rows">
+        <div class="row"><span class="lbl">Input</span><div class="strip" id="stripIn"></div></div>
+        <div class="row"><span class="lbl">Poles + core</span><div class="strip" id="strip7"></div></div>
+        <div class="row"><span class="lbl">Greyscale</span><div class="strip" id="stripGrey"></div></div>
+      </div>
+      <div class="ladderWrap">
+        <div class="lbl">Luminance ladder (OKLab L) · <span id="gapLbl"></span></div>
+        <svg id="ladder" viewBox="0 0 320 56" preserveAspectRatio="none" role="img" aria-label="Luminance ladder"></svg>
+      </div>
+      <ul class="log" id="log"></ul>
+      <label class="toggle"><input type="checkbox" id="pivot" checked> Hue pivot when hues are jammed</label>
+    </section>
+
+    <section class="card" id="system">
+      <h2><span class="n">3</span> The system</h2>
+      <div class="seg" id="typeSeg" role="tablist">
+        <button data-type="cat" class="on">Categorical</button>
+        <button data-type="seq">Sequential</button>
+        <button data-type="div">Divergent</button>
+      </div>
+      <div class="controls">
+        <div class="pills" id="optPills"></div>
+        <div class="ctl" id="nCtl"><button data-d="-1" aria-label="Fewer">−</button><span id="nVal">5</span><button data-d="1" aria-label="More">+</button></div>
+        <div class="seg small" id="centreSeg"><button data-c="white" class="on">White centre</button><button data-c="black">Black centre</button></div>
+      </div>
+      <div class="strip big" id="stripSys"></div>
+      <div class="chart" id="chart"></div>
+      <label class="toggle"><input type="checkbox" id="greyscale"> Preview in greyscale</label>
+    </section>
+
+    <section class="card" id="export">
+      <h2><span class="n">4</span> Take it with you</h2>
+      <p class="hint">The whole system as one object: poles, slate, core and the categorical, sequential and divergent options chosen above. The link in the comment rebuilds it.</p>
+      <div class="seg langs" id="langSeg"></div>
+      <div class="code"><pre id="code"></pre><button id="copy">Copy</button></div>
+    </section>
+
+    <footer>
+      <span id="ver"></span> · <a href="https://github.com/raimun2/loscolores">R package</a> · <a href="https://www.raimundos.cl">raimundos.cl</a>
+    </footer>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
