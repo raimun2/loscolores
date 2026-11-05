@@ -49,7 +49,7 @@ set_loscolores("metric_trails") # the built-in default
 ```
 
 `set_loscolores()` computes the whole system once and keeps it active for the
-rest of the script — no need to pass it again in every plot.
+rest of the script: no need to pass it again in every plot.
 
 When all the input hues are nearly the same, the engine rotates two satellites
 ±40° to separate them. For a deliberately monochrome system, turn that off:
@@ -78,7 +78,7 @@ ggplot(mpg, aes(class, fill = class)) +
   theme_loscolores()
 ```
 
-**Categorical** — for discrete variables (`Option_A` through `Option_D`):
+**Categorical**: for discrete variables (`Option_A` through `Option_D`):
 
 ```r
 ggplot(mpg, aes(class, fill = class)) +
@@ -86,7 +86,7 @@ ggplot(mpg, aes(class, fill = class)) +
   scale_fill_loscolores_cat(option = "Option_B")
 ```
 
-**Sequential** — for continuous variables (`Option_A` through `Option_E`,
+**Sequential**: for continuous variables (`Option_A` through `Option_E`,
 one per core colour, each running to the light pole):
 
 ```r
@@ -95,7 +95,7 @@ ggplot(faithful, aes(waiting, eruptions, color = eruptions)) +
   scale_color_loscolores_seq(option = "Option_A")
 ```
 
-**Divergent** — for continuous variables with a meaningful midpoint (zero,
+**Divergent**: for continuous variables with a meaningful midpoint (zero,
 mean, etc.), centered on white or black. Each arm uses a core colour and its
 complement at the same lightness, so both sides weigh the same:
 
