@@ -1,0 +1,7 @@
+{
+  // Static-assets Worker. Workers Builds: root directory "web", deploy command "npx wrangler deploy".
+  "name": "loscolores",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./public" },
+  "routes": [{ "pattern": "loscolores.raimundos.cl", "custom_domain": true }]
+}
