@@ -3,12 +3,11 @@
 # Package bootstrapping: initialize the Metric Trails default system on load
 # ==============================================================================
 
-# These names are data-frame columns referenced inside dplyr::mutate()
-# (engine_expansion.R) and ggplot2::aes() (methods_s3.R) via non-standard
+# These names are data-frame columns referenced inside ggplot2::aes()
+# (methods_s3.R) via non-standard
 # evaluation. R CMD check can't tell they're columns, not undefined globals -
 # this declaration silences that NOTE without changing any behavior.
 utils::globalVariables(c(
-  "L", "a", "b", "c_new", "h", "h_new",                    # engine_expansion.R
   "pos", "level", "hex", "wid", "variant", "y", "x_pos"    # methods_s3.R
 ))
 

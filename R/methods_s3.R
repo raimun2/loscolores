@@ -6,19 +6,27 @@
 #' Build a loscolores perceptual color system
 #'
 #' @param x HEX vector, R color names, or a sysdata palette key.
+#' @param pivot Logical. Rotate two satellites when hues are jammed (turn off
+#'   for monochrome systems).
 #' @return An object of class \code{lc_system}.
 #' @export
-loscolores_system <- function(x) {
-  input_hex  <- get_input_vector(x)
-  core       <- get_raw_5(input_hex)
-  expansions <- get_expansion_params(core$raw_5, core$hex_black, core$hex_white)
+loscolores_system <- function(x, pivot = TRUE) {
+  input_hex <- get_input_vector(x)
+  core      <- get_raw_5(input_hex, pivot = pivot)
 
   structure(
     list(
-      input     = input_hex,
-      raw_5     = core$raw_5,
-      polos     = list(black = core$hex_black, white = core$hex_white),
-      expansion = expansions
+      engine        = LC_ENGINE_VERSION,
+      input         = input_hex,
+      raw_5         = core$raw_5,
+      polos         = list(black = core$hex_black, white = core$hex_white),
+      pole_source   = core$pole_source,
+      anchor_origin = core$anchor_origin,
+      lab           = core$lab,
+      min_gap       = core$min_gap,
+      hue_variance  = core$hue_variance,
+      pivot         = pivot,
+      log           = core$log
     ),
     class = "lc_system"
   )
@@ -33,11 +41,12 @@ loscolores_system <- function(x) {
 #' Returns the system invisibly to allow optional inspection via assignment.
 #'
 #' @param ... One or more HEX strings or R color names (e.g. \code{set_loscolores("red")}).
+#' @param pivot Logical. Rotate two satellites when hues are jammed.
 #' @return An \code{lc_system} object (invisible).
 #' @export
-set_loscolores <- function(...) {
+set_loscolores <- function(..., pivot = TRUE) {
   input_raw <- unlist(list(...))
-  sys       <- loscolores_system(input_raw)
+  sys       <- loscolores_system(input_raw, pivot = pivot)
   options(loscolores.default_system = sys)
   invisible(sys)
 }
@@ -57,20 +66,17 @@ get_loscolores <- function() {
 #' @export
 print.lc_system <- function(x, ...) {
   cli::cli_h1("loscolores - Stabilized Perceptual System")
-  cli::cli_alert_success("Status: Active | Entropy: Controlled")
-
-  cli::cli_text("{.strong Light pole:} {x$polos$white}")
-  cli::cli_text("{.strong Dark pole:} {x$polos$black}")
-  cli::cli_text("{.strong Anchor (raw_5[1]):} {x$raw_5[1]}")
-  cli::cli_text("{.strong Raw 5:}")
-
-  # Render each HEX using cli ANSI styles (col_br_* are available in cli >= 3.6)
-  styled <- vapply(x$raw_5, function(h) {
-    cli::make_ansi_style(h, bg = TRUE)(" ") # colored block
+  cli::cli_text("{.strong Engine:} {x$engine}")
+  cli::cli_text("{.strong Dark pole:} {x$polos$black}  {.strong Light pole:} {x$polos$white}")
+  cli::cli_text("{.strong Anchor:} {x$raw_5[1]}")
+  styled <- vapply(c(x$polos$black, x$raw_5, x$polos$white), function(h) {
+    cli::make_ansi_style(h, bg = TRUE)("  ")
   }, character(1L))
   cat(paste(x$raw_5, collapse = "  "), "\n")
-  cat(paste(styled,  collapse = " "),  "\n\n")
-
+  cat(paste(styled,  collapse = ""),  "\n\n")
+  cli::cli_h2("How it got here")
+  for (i in seq_len(nrow(x$log)))
+    cli::cli_text("{.strong [{x$log$law[i]}]} {x$log$text[i]}")
   invisible(x)
 }
 
@@ -84,28 +90,23 @@ print.lc_system <- function(x, ...) {
 system_report <- function(sys) {
   cli::cli_h1("loscolores \u2014 System Diagnostics")
 
-  raw_lab <- to_oklab(sys$raw_5)
+  L_raw <- vapply(sys$lab$raw5, `[[`, 0, "L")
+  c_raw <- vapply(sys$lab$raw5, `[[`, 0, "c")
 
-  cli::cli_h2("Luminance Hierarchy (L-Dictator output)")
-  l_vals        <- round(raw_lab$L, 3L)
-  names(l_vals) <- paste0("C", seq_along(l_vals))
+  cli::cli_h2("Luminance ladder (poles + core)")
+  l_vals <- round(c(black = sys$lab$black[["L"]], stats::setNames(L_raw, paste0("C", 1:5)),
+                    white = sys$lab$white[["L"]]), 3L)
   cli::cli_dl(as.list(l_vals))
+  cli::cli_text("Minimum gap: {round(sys$min_gap, 3)}")
 
-  cli::cli_h2("Luminance gaps")
-  gaps        <- round(diff(sort(raw_lab$L)), 3L)
-  names(gaps) <- paste0("gap", seq_along(gaps))
-  cli::cli_dl(as.list(gaps))
-
-  cli::cli_h2("Chroma Entropy")
-  avg_c  <- mean(raw_lab$c)
+  cli::cli_h2("Chroma")
+  avg_c  <- mean(c_raw)
   status <- if (avg_c > 0.12) "Vibrant" else if (avg_c > 0.05) "Standard" else "Muted"
   cli::cli_text("Average chroma: {round(avg_c, 3)} [{status}]")
 
-  cli::cli_h2("Hue Circular Variance")
-  h_rad    <- raw_lab$h * pi / 180
-  circ_var <- 1 - sqrt(mean(cos(h_rad))^2 + mean(sin(h_rad))^2)
-  jam_flag <- if (circ_var < 0.05) " \u26a0\ufe0f  Traffic Jam detected" else " \u2713 OK"
-  cli::cli_text("Circular variance: {round(circ_var, 3)}{jam_flag}")
+  cli::cli_h2("Hue circular variance (input after distil/expand)")
+  jam_flag <- if (sys$hue_variance < 0.05) " \u26a0\ufe0f  Traffic jam" else " \u2713 OK"
+  cli::cli_text("Circular variance: {round(sys$hue_variance, 3)}{jam_flag}")
 
   invisible(sys)
 }
@@ -131,7 +132,7 @@ plot.lc_system <- function(x, ...) {
 
   # -- Block A: signal integration ----------------------------------------------
   raw_7  <- c(x$polos$white, x$raw_5, x$polos$black)
-  gray_7 <- to_hex(to_oklab(raw_7)$L, 0, 0)
+  gray_7 <- to_hex(to_oklab(raw_7)$L, 0, 0)  # greyscale check of the 7 levels
 
   # Tile width must match each row's own point spacing, or short input vectors
   # (e.g. 4 colors stretched across positions 1-7) leave visible gaps between

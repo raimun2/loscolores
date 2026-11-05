@@ -5,22 +5,15 @@
 
 #' Compute a utility slate color from the active poles
 #'
-#' Blends 85% of the white pole's lightness with 15% of the black pole's,
-#' carrying a ghost of the black pole's chromatic tint.
+#' Blends 85% of the white pole's lightness with 15% of the black pole's.
+#' Poles are neutral, so the slate is a neutral grey.
 #'
 #' @param sys An \code{lc_system} object.
 #' @return One #RRGGBB string.
 #' @keywords internal
 get_dynamic_slate <- function(sys) {
-  # FIX: renamed lab_white / lab_black to avoid the ambiguous b$b read
-  lab_white <- to_oklab(sys$polos$white)
-  lab_black <- to_oklab(sys$polos$black)
-
-  to_hex(
-    L = lab_white$L * 0.85 + lab_black$L * 0.15,
-    a = lab_black$a * 0.20,
-    b = lab_black$b * 0.20
-  )
+  w <- sys$lab$white; k <- sys$lab$black
+  lc_lab_to_hex(lc_polar(w[["L"]] * 0.85 + k[["L"]] * 0.15, k[["a"]] * 0.2, k[["b"]] * 0.2))
 }
 
 
