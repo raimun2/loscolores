@@ -38,7 +38,6 @@ operation) and must return identical hex codes. Change both engines together.
 - Rounding to 0-255 is round-half-up (`floor(x*255+0.5)` in R).
 - Near-ties in distillation (evenly spaced ramps) go to the first candidate with tolerance `TIE = 1e-9`.
 - Verified Nov 2026: 60 fixture cases (2040 expectations) and 400 random inputs, 0 mismatches.
-- `wrangler.jsonc`: static-assets Worker `loscolores`, custom domain `loscolores.raimundos.cl`.
 
 ## Engine decisions
 - Poles are always neutral greys, including the defaults (greys at the L of #1D1C1B and #F4F3F3).
@@ -53,15 +52,8 @@ operation) and must return identical hex codes. Change both engines together.
 - Sequential: core colour to light pole (L × 0.97, 4% of the hue).
 - Divergent: complement at the same L and chroma as the base (both arms weigh the same in greyscale), centre = white or black pole.
 
-## Fixes vs R 0.1.0 (diagnosed Nov 2026, fixed in R 0.2.0)
-- R's 0.15 L gap is infeasible with 7 levels (max ≈ 0.123); its fallback ignored the anchor, giving gaps of 0.001 to 0.05.
-- R captured chromatic colours as poles (navy anchor became the black pole; a yellow became a grey white pole).
-- R clamped the anchor's L into a safe zone (light anchors changed).
-- R's k-means had no seed (non-deterministic) and returned centroids, not real colours.
-- R's per-channel clipping shifted L; here gamut mapping preserves L.
-
 ## Deploy
-Workers Builds on `main`, root directory `web`, deploy command `npx wrangler deploy`. Every push to main deploys.
+`wrangler.jsonc`: static-assets Worker `loscolores`, custom domain `loscolores.raimundos.cl`. Workers Builds on `main`, root directory `web`, deploy command `npx wrangler deploy`. Every push to main deploys.
 
 ## Open
 - MATLAB, Stata and C# snippets were checked by eye only (no interpreter available). R, Python and JS were executed.
