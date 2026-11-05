@@ -2,9 +2,27 @@
 
 A perceptual color system generator (OKLab) for R. Give it a couple of
 reference colors (say, your brand colors) and the engine derives a complete
-system: 5 perceptually-separated base colors, black/white poles, and
+system: 5 perceptually-separated base colors, neutral black/white poles, and
 categorical, sequential, and divergent variants ready for `ggplot2` or base R
 plots.
+
+The same engine runs on the web at <https://loscolores.raimundos.cl>, where you
+can see how the system is built and export it as a one-line object for R,
+Python, MATLAB, Stata, JS or C#. Both engines return exactly the same colours.
+
+## The rules
+
+1. The first colour is the **anchor**: its exact value is kept, always in slot 1.
+2. **Luminance is the backbone**: the 7 levels (2 poles + 5 core) are spread in
+   lightness so the system reads in greyscale. Out-of-gamut colours lose chroma,
+   never lightness.
+3. **Poles are neutral greys.** A near-black or near-white input becomes a pole
+   only if it is neutral; a navy or a pale yellow stays a colour.
+4. Any input resolves to the same skeleton: more than 5 colours are distilled
+   (real input colours are kept), fewer are expanded with hues placed as far
+   apart as possible.
+5. Every decision is logged: `print(get_loscolores())` shows how the system
+   got there.
 
 ## Installation
 
@@ -32,6 +50,13 @@ set_loscolores("metric_trails") # the built-in default
 
 `set_loscolores()` computes the whole system once and keeps it active for the
 rest of the script — no need to pass it again in every plot.
+
+When all the input hues are nearly the same, the engine rotates two satellites
+±40° to separate them. For a deliberately monochrome system, turn that off:
+
+```r
+set_loscolores("#08306B", "#2171B5", "#6BAED6", pivot = FALSE)
+```
 
 To see the full system (input -> 5 base colors + poles -> categorical /
 sequential / divergent variants) in a single panel:
@@ -61,7 +86,8 @@ ggplot(mpg, aes(class, fill = class)) +
   scale_fill_loscolores_cat(option = "Option_B")
 ```
 
-**Sequential** — for continuous variables (`Option_A` through `Option_E`):
+**Sequential** — for continuous variables (`Option_A` through `Option_E`,
+one per core colour, each running to the light pole):
 
 ```r
 ggplot(faithful, aes(waiting, eruptions, color = eruptions)) +
@@ -70,7 +96,8 @@ ggplot(faithful, aes(waiting, eruptions, color = eruptions)) +
 ```
 
 **Divergent** — for continuous variables with a meaningful midpoint (zero,
-mean, etc.), centered on white or black:
+mean, etc.), centered on white or black. Each arm uses a core colour and its
+complement at the same lightness, so both sides weigh the same:
 
 ```r
 mtcars$mpg_c <- scale(mtcars$mpg)[, 1]
@@ -123,8 +150,8 @@ heatmap(cor(mtcars), col = pal_div, symm = TRUE)
 ## Diagnostics
 
 ```r
-system_report(get_loscolores())   # luminance hierarchy, chroma entropy, etc.
-print(get_loscolores())           # short console summary with color swatches
+system_report(get_loscolores())   # luminance ladder, minimum gap, chroma, hue variance
+print(get_loscolores())           # swatches plus the log of every decision
 ```
 
 ## Built-in known palettes

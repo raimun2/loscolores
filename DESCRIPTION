@@ -1,14 +1,14 @@
 Package: loscolores
 Title: Engineering-Grade Perceptual Color Systems
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Raimundo", "Sanchez", email = "raimundosanchezu@gmail.com", role = c("aut", "cre"))
-Description: A perceptual color system builder based on OKLab. Ensures luminance hierarchy, applies entropy safety to achromatic inputs, and provides robust manifolds for categorical, sequential, and divergent data visualization.
+Description: A perceptual color system builder based on OKLab. From any reference colours it derives two neutral poles and five core colours with a guaranteed luminance ladder (the system reads in greyscale), keeps the first colour as an exact anchor, and provides categorical, sequential and divergent palettes. Same engine as the web tool at <https://loscolores.raimundos.cl>.
 License: MIT + file LICENSE
+URL: https://loscolores.raimundos.cl, https://github.com/raimun2/loscolores
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Imports: 
     ggplot2,
-    farver,
     patchwork,
     dplyr,
     stats,
@@ -19,7 +19,10 @@ Imports:
 Depends: 
     R (>= 4.1.0)
 Suggests:
+    jsonlite,
+    testthat (>= 3.0.0),
     viridisLite,
     wesanderson,
     RColorBrewer
+Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
